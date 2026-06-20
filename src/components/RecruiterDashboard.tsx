@@ -48,18 +48,6 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
   const selectedCandidate = candidates.find(c => c.id === selectedCandidateId) || candidates[0];
   const comparisonCandidate = candidates.find(c => c.id === compareId) || candidates[0];
 
-  const getTagStyles = (tag: string) => {
-    switch (tag) {
-      case 'Diamond':
-        return { bg: 'rgba(139, 92, 246, 0.15)', text: '#a78bfa', border: 'rgba(139, 92, 246, 0.3)' };
-      case 'Switcher':
-        return { bg: 'rgba(244, 63, 94, 0.15)', text: '#fb7185', border: 'rgba(244, 63, 94, 0.3)' };
-      case 'Contributor':
-        return { bg: 'rgba(6, 182, 212, 0.15)', text: '#22d3ee', border: 'rgba(6, 182, 212, 0.3)' };
-      default:
-        return { bg: 'rgba(255, 255, 255, 0.05)', text: 'var(--text-secondary)', border: 'var(--border-color)' };
-    }
-  };
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '0 20px 20px 20px', flexGrow: 1 }}>
