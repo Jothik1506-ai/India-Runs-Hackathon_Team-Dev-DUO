@@ -285,7 +285,7 @@ export const AIChat: React.FC<AIChatProps> = ({ onSelectCandidate, aiName }) => 
             border: '1px solid var(--border-color)', 
             borderRadius: '8px', 
             padding: '10px 14px', 
-            color: '#fff',
+            color: 'var(--text-primary)',
             fontSize: '13px',
             outline: 'none'
           }}
@@ -305,7 +305,7 @@ export const AIChat: React.FC<AIChatProps> = ({ onSelectCandidate, aiName }) => 
             boxShadow: '0 4px 10px var(--color-primary-glow)'
           }}
         >
-          <Send size={16} style={{ color: '#fff' }} />
+          <Send size={16} style={{ color: 'var(--text-primary)' }} />
         </button>
       </form>
       <style>{`

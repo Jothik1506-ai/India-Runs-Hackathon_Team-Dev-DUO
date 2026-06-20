@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Award, Target, BrainCircuit, MessageSquare, GitBranch, ShieldCheck, Zap, Upload } from 'lucide-react';
+import { Target, BrainCircuit, ShieldCheck, Upload, Globe } from 'lucide-react';
 import type { Candidate } from '../data/mockCandidates';
 import { RadarChart } from './RadarChart';
-import { AIChat } from './AIChat';
 import { ResumeUploader } from './ResumeUploader';
 
 interface RecruiterDashboardProps {
@@ -16,15 +15,25 @@ interface RecruiterDashboardProps {
 export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
   selectedCandidateId,
   setSelectedCandidateId,
-  aiName,
+  aiName: _aiName,
   candidates,
   onUploadCandidate
 }) => {
   const [filterTag, setFilterTag] = useState<string>('ALL');
   const [compareMode, setCompareMode] = useState<boolean>(false);
-  const [compareId, setCompareId] = useState<string>('cand-5'); // compare with David Kim by default
-  const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
+  const [compareId, setCompareId] = useState<string>(candidates[1]?.id || 'cand-2');
   const [isUploaderOpen, setIsUploaderOpen] = useState<boolean>(false);
+  
+  // Track checklist tasks completed by candidate
+  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});
+
+  const toggleTask = (candidateId: string, taskIndex: number) => {
+    const key = `${candidateId}-${taskIndex}`;
+    setCompletedTasks(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
 
   // Filter candidates based on state prop
   const filteredCandidates = candidates.filter(c => {
@@ -36,8 +45,8 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
   // Sort candidates by matchScore descending
   const rankedCandidates = [...filteredCandidates].sort((a, b) => b.matchScore - a.matchScore);
 
-  const selectedCandidate = candidates.find(c => c.id === selectedCandidateId) || candidates[0] || mockFallback;
-  const comparisonCandidate = candidates.find(c => c.id === compareId) || candidates[0] || mockFallback;
+  const selectedCandidate = candidates.find(c => c.id === selectedCandidateId) || candidates[0];
+  const comparisonCandidate = candidates.find(c => c.id === compareId) || candidates[0];
 
   const getTagStyles = (tag: string) => {
     switch (tag) {
@@ -53,173 +62,177 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '20px' }}>
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '0 20px 20px 20px', flexGrow: 1 }}>
       
-      {/* Metrics Banner */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '20px' }}>
-        <div className="glass-panel" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'var(--color-primary-glow)', display: 'flex', alignItems: 'center', paddingLeft: '8px' }}>
-            <BrainCircuit style={{ color: 'var(--color-primary)' }} />
-          </div>
-          <div>
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>AI Audited Profiles</span>
-            <h4 style={{ fontSize: '20px', fontWeight: 'bold' }}>{candidates.length} Active</h4>
-          </div>
-        </div>
-        <div className="glass-panel" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'var(--color-secondary-glow)', display: 'flex', alignItems: 'center', paddingLeft: '8px' }}>
-            <Award style={{ color: 'var(--color-secondary)' }} />
-          </div>
-          <div>
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Hidden Talents Unlocked</span>
-            <h4 style={{ fontSize: '20px', fontWeight: 'bold' }}>{candidates.filter(c => c.tag !== 'Standard').length} High-Potential</h4>
-          </div>
-        </div>
-        <div className="glass-panel" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', paddingLeft: '8px' }}>
-            <Zap style={{ color: '#10b981' }} />
-          </div>
-          <div>
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Avg. Learning Velocity</span>
-            <h4 style={{ fontSize: '20px', fontWeight: 'bold' }}>88.2% Velocity</h4>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: '20px', flexGrow: 1, alignItems: 'stretch' }}>
-        
-        {/* Left column - Rankings & Upload Panel */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          
-          {/* Quick Filters */}
-          <div className="glass-panel" style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>FILTER POOL</span>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {['ALL', 'HIDDEN', 'Diamond', 'Switcher', 'Contributor'].map((tag) => (
-                <button
-                  key={tag}
-                  onClick={() => setFilterTag(tag)}
-                  style={{
-                    background: filterTag === tag ? 'var(--color-primary)' : 'rgba(255,255,255,0.03)',
-                    border: '1px solid',
-                    borderColor: filterTag === tag ? 'var(--color-primary)' : 'var(--border-color)',
-                    borderRadius: '6px',
-                    padding: '4px 10px',
-                    fontSize: '11px',
-                    color: '#fff',
-                    cursor: 'pointer',
-                    transition: 'all var(--transition-fast)'
-                  }}
-                >
-                  {tag === 'ALL' ? 'All Applicants' : tag === 'HIDDEN' ? 'Hidden Talents' : tag}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* RAG Upload Widget collapsible card */}
-          <div className="glass-panel" style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <button 
-              onClick={() => setIsUploaderOpen(!isUploaderOpen)}
+      {/* Upper Panel Quick Info & Action Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {['ALL', 'HIDDEN', 'Diamond', 'Switcher', 'Contributor'].map((tag) => (
+            <button
+              key={tag}
+              onClick={() => setFilterTag(tag)}
               style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--color-secondary)',
+                background: filterTag === tag ? 'var(--color-primary)' : 'var(--bg-input)',
+                border: '1px solid',
+                borderColor: filterTag === tag ? 'var(--color-primary)' : 'var(--border-color)',
+                borderRadius: '8px',
+                padding: '6px 14px',
                 fontSize: '12px',
-                fontWeight: 600,
+                fontWeight: 500,
+                color: filterTag === tag ? '#fff' : 'var(--text-secondary)',
                 cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%'
+                transition: 'all var(--transition-fast)',
+                fontFamily: 'var(--font-sans)'
               }}
             >
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Upload size={14} />
-                INDEX NEW RESUMES (RAG)
-              </span>
-              <span>{isUploaderOpen ? 'Collapse [-]' : 'Expand [+]'}</span>
+              {tag === 'ALL' ? 'All Applicants' : tag === 'HIDDEN' ? 'High Potential' : tag === 'Diamond' ? 'Diamond Talent' : tag}
             </button>
-            
-            {isUploaderOpen && (
-              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '10px', marginTop: '4px' }}>
-                <ResumeUploader onUploadCandidate={onUploadCandidate} />
-              </div>
-            )}
-          </div>
+          ))}
+        </div>
 
-          {/* List Wrapper */}
-          <div className="glass-panel" style={{ flexGrow: 1, padding: '12px', overflowY: 'auto', maxHeight: '450px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '10px' }}>RANKED APPLICANTS</span>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {rankedCandidates.map((c, index) => {
-                const styles = getTagStyles(c.tag);
-                const isSelected = c.id === selectedCandidateId;
-                return (
-                  <div
-                    key={c.id}
-                    onClick={() => setSelectedCandidateId(c.id)}
-                    style={{
-                      background: isSelected ? 'rgba(139, 92, 246, 0.08)' : 'rgba(255, 255, 255, 0.02)',
-                      border: `1px solid ${isSelected ? 'var(--color-primary)' : 'var(--border-color)'}`,
-                      borderRadius: '10px',
-                      padding: '12px',
-                      cursor: 'pointer',
-                      transition: 'all var(--transition-fast)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-secondary)', width: '16px' }}>#{index + 1}</div>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'var(--color-secondary)' }}>
-                        {c.avatar}
+        <button 
+          onClick={() => setIsUploaderOpen(!isUploaderOpen)}
+          className="glow-btn-secondary"
+          style={{ fontSize: '12px', padding: '8px 16px', borderRadius: '8px' }}
+        >
+          <Upload size={14} />
+          {isUploaderOpen ? 'Close Uploader' : 'Upload Resumes'}
+        </button>
+      </div>
+
+      {/* RAG Upload Widget collapsible drawer */}
+      {isUploaderOpen && (
+        <div className="glass-panel" style={{ padding: '16px', marginBottom: '16px' }}>
+          <h4 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-secondary)', marginBottom: '10px' }}>INDEX NEW RESUMES INTO RAG DATABASE</h4>
+          <ResumeUploader onUploadCandidate={(name, content) => {
+            onUploadCandidate(name, content);
+            setIsUploaderOpen(false);
+          }} />
+        </div>
+      )}
+
+      {/* Main Grid: Sidebar + Candidate Details */}
+      <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: '20px', flexGrow: 1, alignItems: 'stretch' }}>
+        
+        {/* Left column - Rankings & Talent Pool */}
+        <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', padding: '16px', maxHeight: 'calc(100vh - 180px)', overflowY: 'auto' }}>
+          <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: '12px', letterSpacing: '0.5px' }}>
+            RANKED APPLICANTS ({rankedCandidates.length})
+          </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {rankedCandidates.map((c, index) => {
+              const isSelected = c.id === selectedCandidateId;
+              const avatarRing = c.tag === 'Diamond' ? 'avatar-ring-diamond' : c.tag === 'Switcher' ? 'avatar-ring-switcher' : c.tag === 'Contributor' ? 'avatar-ring-contributor' : 'avatar-ring-standard';
+              const tagClass = c.tag === 'Diamond' ? 'tag-diamond' : c.tag === 'Switcher' ? 'tag-switcher' : c.tag === 'Contributor' ? 'tag-contributor' : '';
+              const avatarBg = c.tag === 'Diamond' ? 'rgba(139,92,246,0.12)' : c.tag === 'Switcher' ? 'rgba(244,63,94,0.12)' : c.tag === 'Contributor' ? 'rgba(6,182,212,0.12)' : 'rgba(255,255,255,0.05)';
+              const avatarColor = c.tag === 'Diamond' ? '#c4b5fd' : c.tag === 'Switcher' ? '#fda4af' : c.tag === 'Contributor' ? '#67e8f9' : 'var(--text-secondary)';
+              return (
+                <div
+                  key={c.id}
+                  onClick={() => setSelectedCandidateId(c.id)}
+                  className={isSelected ? 'candidate-item-selected' : ''}
+                  style={{
+                    background: isSelected ? undefined : 'rgba(255,255,255,0.015)',
+                    border: isSelected ? undefined : '1px solid var(--border-color)',
+                    borderRadius: '10px',
+                    padding: '10px 12px',
+                    cursor: 'pointer',
+                    transition: 'all var(--transition-fast)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden', flex: 1 }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: isSelected ? 'var(--color-primary)' : 'var(--text-muted)', width: '18px', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
+                        {index + 1}
                       </div>
-                      <div>
-                        <h5 style={{ fontSize: '13.5px', fontWeight: 600, color: '#fff' }}>{c.name}</h5>
-                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block' }}>{c.title}</span>
-                        {c.tag !== 'Standard' && (
-                          <span style={{ 
-                            background: styles.bg, 
-                            color: styles.text, 
-                            border: `1px solid ${styles.border}`, 
-                            fontSize: '9px', 
-                            padding: '1px 6px', 
-                            borderRadius: '4px',
-                            display: 'inline-block',
-                            marginTop: '4px'
-                          }}>
-                            {c.tagLabel}
-                          </span>
-                        )}
+                      <div className={`score-ring ${avatarRing}`} style={{
+                        width: '34px',
+                        height: '34px',
+                        background: `conic-gradient(${avatarColor} ${c.matchScore}%, rgba(255,255,255,0.04) 0)`,
+                        flexShrink: 0
+                      }}>
+                        <div style={{
+                          width: '26px', height: '26px', borderRadius: '50%',
+                          background: avatarBg,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '11px', fontWeight: 700, color: avatarColor
+                        }}>
+                          {c.avatar}
+                        </div>
+                      </div>
+                      <div style={{ overflow: 'hidden', flex: 1 }}>
+                        <h5 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</h5>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                          {c.tag !== 'Standard' && (
+                            <span className={tagClass} style={{ fontSize: '9px', padding: '1px 6px', borderRadius: '4px', fontWeight: 600, letterSpacing: '0.3px' }}>
+                              {c.tagLabel}
+                            </span>
+                          )}
+                          <span style={{ fontSize: '10px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.title.split(' ').slice(0,2).join(' ')}</span>
+                        </div>
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--color-secondary)' }}>{c.matchScore}%</div>
-                      <span style={{ fontSize: '9px', color: 'var(--text-muted)' }}>Match</span>
+                    <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: '8px' }}>
+                      <div style={{ fontSize: '15px', fontWeight: 700, fontFamily: 'var(--font-mono)', background: 'linear-gradient(135deg, #67e8f9, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{c.matchScore}%</div>
+                      <span style={{ fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.4px' }}>MATCH</span>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                  <div className="progress-bar-track" style={{ height: '2px' }}>
+                    <div className={`progress-bar-fill ${c.tag === 'Diamond' ? 'progress-bar-fill-purple' : c.tag === 'Contributor' ? 'progress-bar-fill-cyan' : c.tag === 'Switcher' ? '' : 'progress-bar-fill-cyan'}`}
+                      style={{ width: `${c.matchScore}%`, background: c.tag === 'Switcher' ? 'linear-gradient(90deg, #be185d, #f43f5e, #fb7185)' : undefined }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Right column - Deep Details & Compare */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          
-          {/* Main Details Panel */}
+        {/* Right column - Candidate Details & Comparison panel */}
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxHeight: 'calc(100vh - 180px)', overflowY: 'auto' }}>
           {selectedCandidate && (
-            <div className="glass-panel" style={{ padding: '20px', flexGrow: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px', flexGrow: 1 }}>
               
-              {/* Candidate Header */}
+              {/* Header Panel */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
                 <div>
-                  <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#fff' }}>{selectedCandidate.name}</h2>
-                  <p style={{ color: 'var(--color-secondary)', fontSize: '14px', fontWeight: 500 }}>{selectedCandidate.title} &bull; <span style={{ color: 'var(--text-secondary)' }}>{selectedCandidate.email}</span></p>
-                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '8px', maxWidth: '600px' }}>{selectedCandidate.background}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <h2 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{selectedCandidate.name}</h2>
+                    {selectedCandidate.tag !== 'Standard' && (
+                      <span className={`${selectedCandidate.tag === 'Diamond' ? 'tag-diamond' : selectedCandidate.tag === 'Switcher' ? 'tag-switcher' : 'tag-contributor'}`}
+                        style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '6px', fontWeight: 700, letterSpacing: '0.4px' }}>
+                        {selectedCandidate.tagLabel}
+                      </span>
+                    )}
+                  </div>
+                  <p style={{ color: 'var(--color-secondary)', fontSize: '13.5px', fontWeight: 500, marginTop: '4px' }}>
+                    {selectedCandidate.title} &bull; <span style={{ color: 'var(--text-secondary)' }}>{selectedCandidate.email}</span>
+                  </p>
+                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '8px', lineHeight: '1.4' }}>
+                    {selectedCandidate.background}
+                  </p>
+
+                  {/* Portfolio / Social Links */}
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
+                    {selectedCandidate.portfolioUrl && (
+                      <a href={`https://${selectedCandidate.portfolioUrl}`} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--color-secondary)', textDecoration: 'none' }}>
+                        <Globe size={12} /> {selectedCandidate.portfolioUrl}
+                      </a>
+                    )}
+                    {selectedCandidate.githubUrl && (
+                      <a href={`https://${selectedCandidate.githubUrl}`} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--text-secondary)', textDecoration: 'none' }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg> {selectedCandidate.githubUrl}
+                      </a>
+                    )}
+                    {selectedCandidate.linkedinUrl && (
+                      <a href={`https://${selectedCandidate.linkedinUrl}`} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--text-secondary)', textDecoration: 'none' }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9" rx="1"/><circle cx="4" cy="4" r="2"/></svg> {selectedCandidate.linkedinUrl}
+                      </a>
+                    )}
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -228,209 +241,200 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
                     className="btn-outline" 
                     style={{ fontSize: '12px', padding: '6px 12px' }}
                   >
-                    <GitBranch size={14} />
-                    {compareMode ? 'Exit Compare' : 'Compare Candidate'}
+                    {compareMode ? 'Exit Comparison' : 'Compare Candidate'}
                   </button>
                 </div>
               </div>
 
-              {/* Side-by-Side Comparison Mode or Normal Mode */}
+              {/* Detail Modes */}
               {compareMode ? (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                   
-                  {/* Left - Selected Candidate */}
+                  {/* Left Column: Active Selected Candidate */}
                   <div style={{ borderRight: '1px solid var(--border-color)', paddingRight: '16px' }}>
-                    <h4 style={{ color: 'var(--color-primary)', fontSize: '15px', marginBottom: '10px' }}>{selectedCandidate.name} (Active)</h4>
-                    <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                      <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                        <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>MATCH SCORE</span>
-                        <h4 style={{ fontSize: '18px', color: 'var(--color-secondary)' }}>{selectedCandidate.matchScore}%</h4>
+                    <h4 style={{ color: 'var(--color-primary)', fontSize: '14px', fontWeight: 600, marginBottom: '12px' }}>
+                      {selectedCandidate.name} (Active)
+                    </h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px' }}>
+                      <div className="metric-card-cyan">
+                        <span className="section-label" style={{ fontSize: '9px', color: 'var(--color-secondary)', marginBottom: '4px' }}>MATCH SCORE</span>
+                        <h4 className="gradient-text-secondary" style={{ fontSize: '20px', fontFamily: 'var(--font-mono)', fontWeight: 800 }}>{selectedCandidate.matchScore}%</h4>
                       </div>
-                      <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                        <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>LEARNING VELOCITY</span>
-                        <h4 style={{ fontSize: '18px', color: 'var(--color-primary)' }}>{selectedCandidate.learningVelocity}%</h4>
+                      <div className="metric-card-green">
+                        <span className="section-label" style={{ fontSize: '9px', color: 'var(--color-success)', marginBottom: '4px' }}>LEARNING VELOCITY</span>
+                        <h4 className="gradient-text-success" style={{ fontSize: '20px', fontFamily: 'var(--font-mono)', fontWeight: 800 }}>{selectedCandidate.learningVelocity}%</h4>
                       </div>
                     </div>
                     <RadarChart data={selectedCandidate.careerDNA} />
-                    <div style={{ background: 'rgba(139, 92, 246, 0.05)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(139,92,246,0.1)', fontSize: '12px', color: 'var(--text-secondary)', marginTop: '10px' }}>
-                      <strong>Rank Reason:</strong> {selectedCandidate.rankReason}
+                    <div className="insight-panel insight-panel-purple" style={{ marginTop: '12px' }}>
+                      <strong style={{ fontSize: '11px', color: 'var(--color-primary)' }}>AI Insights:</strong>
+                      <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.45' }}>{selectedCandidate.rankReason}</p>
                     </div>
                   </div>
 
-                  {/* Right - Comparison Selection */}
+                  {/* Right Column: Comparative Candidate Selector */}
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                      <h4 style={{ color: 'var(--color-secondary)', fontSize: '15px' }}>Compare With:</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h4 style={{ color: 'var(--color-secondary)', fontSize: '14px', fontWeight: 600 }}>Compare With:</h4>
                       <select 
                         value={compareId}
                         onChange={(e) => setCompareId(e.target.value)}
-                        style={{ background: 'var(--bg-main)', color: '#fff', border: '1px solid var(--border-color)', padding: '4px 8px', borderRadius: '6px', fontSize: '11px' }}
+                        className="input-base"
+                        style={{ padding: '4px 10px', fontSize: '12px' }}
                       >
                         {candidates.filter(c => c.id !== selectedCandidate.id).map(c => (
                           <option key={c.id} value={c.id}>{c.name} ({c.matchScore}%)</option>
                         ))}
                       </select>
                     </div>
-                    <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                      <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                        <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>MATCH SCORE</span>
-                        <h4 style={{ fontSize: '18px', color: 'var(--color-secondary)' }}>{comparisonCandidate.matchScore}%</h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px' }}>
+                      <div className="metric-card-cyan">
+                        <span className="section-label" style={{ fontSize: '9px', color: 'var(--color-secondary)', marginBottom: '4px' }}>MATCH SCORE</span>
+                        <h4 className="gradient-text-secondary" style={{ fontSize: '20px', fontFamily: 'var(--font-mono)', fontWeight: 800 }}>{comparisonCandidate.matchScore}%</h4>
                       </div>
-                      <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                        <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>LEARNING VELOCITY</span>
-                        <h4 style={{ fontSize: '18px', color: 'var(--color-primary)' }}>{comparisonCandidate.learningVelocity}%</h4>
+                      <div className="metric-card-green">
+                        <span className="section-label" style={{ fontSize: '9px', color: 'var(--color-success)', marginBottom: '4px' }}>LEARNING VELOCITY</span>
+                        <h4 className="gradient-text-success" style={{ fontSize: '20px', fontFamily: 'var(--font-mono)', fontWeight: 800 }}>{comparisonCandidate.learningVelocity}%</h4>
                       </div>
                     </div>
                     <RadarChart data={comparisonCandidate.careerDNA} />
-                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '12px', color: 'var(--text-secondary)', marginTop: '10px' }}>
-                      <strong>Rank Reason:</strong> {comparisonCandidate.rankReason}
+                    <div className="insight-panel" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', marginTop: '12px' }}>
+                      <strong style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>AI Insights:</strong>
+                      <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.45' }}>{comparisonCandidate.rankReason}</p>
                     </div>
                   </div>
 
                 </div>
               ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '24px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   
-                  {/* Left - DNA Web */}
-                  <div>
-                    <h4 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Target size={14} style={{ color: 'var(--color-secondary)' }} />
-                      CAREER DNA PROFILE
-                    </h4>
-                    <div style={{ background: 'rgba(0, 0, 0, 0.15)', borderRadius: '12px', padding: '10px', border: '1px solid var(--border-color)' }}>
-                      <RadarChart data={selectedCandidate.careerDNA} />
+                  {/* Candidate Metrics Cards */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                    <div className="metric-card-cyan" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <span className="section-label" style={{ color: 'var(--color-secondary)' }}>
+                        <ShieldCheck size={11} style={{ color: 'var(--color-secondary)' }} />
+                        Profile Complete
+                      </span>
+                      <h4 className="gradient-text-secondary" style={{ fontSize: '26px', fontWeight: 800, fontFamily: 'var(--font-mono)' }}>{selectedCandidate.completenessScore}%</h4>
+                      <div className="progress-bar-track">
+                        <div className="progress-bar-fill progress-bar-fill-cyan" style={{ width: `${selectedCandidate.completenessScore}%` }} />
+                      </div>
+                    </div>
+                    <div className="metric-card-purple" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <span className="section-label" style={{ color: 'var(--color-primary)' }}>
+                        <BrainCircuit size={11} style={{ color: 'var(--color-primary)' }} />
+                        Resume Quality
+                      </span>
+                      <h4 className="gradient-text-primary" style={{ fontSize: '26px', fontWeight: 800, fontFamily: 'var(--font-mono)' }}>{selectedCandidate.resumeQualityScore}%</h4>
+                      <div className="progress-bar-track">
+                        <div className="progress-bar-fill progress-bar-fill-purple" style={{ width: `${selectedCandidate.resumeQualityScore}%` }} />
+                      </div>
+                    </div>
+                    <div className="metric-card-green" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <span className="section-label" style={{ color: 'var(--color-success)' }}>
+                        <Target size={11} style={{ color: 'var(--color-success)' }} />
+                        Learning Velocity
+                      </span>
+                      <h4 className="gradient-text-success" style={{ fontSize: '26px', fontWeight: 800, fontFamily: 'var(--font-mono)' }}>{selectedCandidate.learningVelocity}%</h4>
+                      <div className="progress-bar-track">
+                        <div className="progress-bar-fill progress-bar-fill-green" style={{ width: `${selectedCandidate.learningVelocity}%` }} />
+                      </div>
                     </div>
                   </div>
 
-                  {/* Right - Profile stats, Growth & Why */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {/* Dual Panel details */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '24px', alignItems: 'start' }}>
                     
-                    {/* Score breakdown */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-                      <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '10px' }}>
-                        <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>PROFILE COMPLETENESS</span>
-                        <h4 style={{ fontSize: '22px', fontWeight: 'bold', color: '#fff' }}>{selectedCandidate.completenessScore}%</h4>
-                      </div>
-                      <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '10px' }}>
-                        <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>RESUME QUALITY SCORE</span>
-                        <h4 style={{ fontSize: '22px', fontWeight: 'bold', color: '#fff' }}>{selectedCandidate.resumeQualityScore}%</h4>
-                      </div>
-                      <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '10px' }}>
-                        <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>PROJECT COMPLEXITY</span>
-                        <h4 style={{ fontSize: '22px', fontWeight: 'bold', color: '#fff' }}>{selectedCandidate.projectQuality}%</h4>
+                    {/* DNA Profile (Left) */}
+                    <div>
+                      <h4 style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Target size={14} style={{ color: 'var(--color-secondary)' }} />
+                        CAREER DNA PROFILE
+                      </h4>
+                      <div style={{ background: 'var(--bg-input)', borderRadius: '12px', padding: '12px', border: '1px solid var(--border-color)' }}>
+                        <RadarChart data={selectedCandidate.careerDNA} />
                       </div>
                     </div>
 
-                    {/* Future Readiness Prediction */}
-                    <div style={{ background: 'rgba(6, 182, 212, 0.03)', border: '1px solid rgba(6, 182, 212, 0.1)', borderRadius: '12px', padding: '14px' }}>
-                      <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-secondary)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                        <ShieldCheck size={14} />
-                        FUTURE READINESS PREDICTION
-                      </h4>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px' }}>
-                        <div style={{ display: 'flex', flexGrow: 1, flexDirection: 'column', gap: '6px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                            <span>Current Match: <strong>{selectedCandidate.matchScore}%</strong></span>
-                            <span>6m Projection: <strong>{selectedCandidate.futureReadiness6m}%</strong></span>
-                            <span>1y Projection: <strong>{selectedCandidate.futureReadiness1y}%</strong></span>
-                          </div>
-                          {/* Interactive glow progress bars */}
-                          <div style={{ background: 'rgba(255,255,255,0.05)', height: '6px', borderRadius: '3px', position: 'relative', overflow: 'hidden' }}>
-                            <div style={{ background: 'var(--color-secondary)', width: `${selectedCandidate.matchScore}%`, height: '100%', position: 'absolute', left: 0, zIndex: 3 }} />
-                            <div style={{ background: 'var(--color-primary)', width: `${selectedCandidate.futureReadiness6m}%`, height: '100%', position: 'absolute', left: 0, zIndex: 2, opacity: 0.6 }} />
-                            <div style={{ background: '#10b981', width: `${selectedCandidate.futureReadiness1y}%`, height: '100%', position: 'absolute', left: 0, zIndex: 1, opacity: 0.3 }} />
-                          </div>
+                    {/* Projections & Roadmaps (Right) */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      
+                      {/* Projections Stack Bar */}
+                      <div className="insight-panel insight-panel-cyan">
+                        <h4 className="section-label" style={{ color: 'var(--color-secondary)', marginBottom: '10px' }}>
+                          <ShieldCheck size={12} />
+                          FUTURE READINESS PROJECTIONS
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {[
+                            { label: 'Current Match', val: selectedCandidate.matchScore, cls: 'progress-bar-fill-cyan' },
+                            { label: '6-Month Projection', val: selectedCandidate.futureReadiness6m, cls: 'progress-bar-fill-purple' },
+                            { label: '1-Year Projection', val: selectedCandidate.futureReadiness1y, cls: 'progress-bar-fill-green' },
+                          ].map(({ label, val, cls }) => (
+                            <div key={label}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                                <span>{label}</span>
+                                <strong style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>{val}%</strong>
+                              </div>
+                              <div className="progress-bar-track" style={{ height: '4px' }}>
+                                <div className={`progress-bar-fill ${cls}`} style={{ width: `${val}%` }} />
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    </div>
 
-                    {/* Explainable Rank Explanation */}
-                    <div style={{ background: 'rgba(139, 92, 246, 0.03)', border: '1px solid rgba(139, 92, 246, 0.1)', borderRadius: '12px', padding: '14px' }}>
-                      <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                        <BrainCircuit size={14} />
-                        EXPLAINABLE RANK REASONING
-                      </h4>
-                      <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-                        {selectedCandidate.rankReason}
-                      </p>
-                    </div>
-
-                    {/* Roadmap Summary */}
-                    <div>
-                      <h4 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>PROJECTED 6-MONTH UPSKILLING ROADMAP ({selectedCandidate.predictedRoadmap.goal})</h4>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        {selectedCandidate.predictedRoadmap.tasks.map((t, idx) => (
-                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '6px 12px', fontSize: '12px' }}>
-                            <span style={{ color: 'var(--text-primary)' }}>&bull; {t.name}</span>
-                            <span style={{ color: 'var(--color-secondary)', fontFamily: 'var(--font-mono)' }}>{t.duration}</span>
-                          </div>
-                        ))}
+                      {/* Rank Reasoning */}
+                      <div className="insight-panel insight-panel-purple">
+                        <h4 className="section-label" style={{ color: 'var(--color-primary)', marginBottom: '8px' }}>
+                          <BrainCircuit size={12} />
+                          EXPLAINABLE RANK REASONING
+                        </h4>
+                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.55' }}>
+                          {selectedCandidate.rankReason}
+                        </p>
                       </div>
+
+                      {/* Timeline Roadmap */}
+                      <div>
+                        <h4 className="section-label" style={{ marginBottom: '10px' }}>
+                          PROJECTED 6-MONTH UPSKILLING ROADMAP &mdash; <span style={{ color: 'var(--color-secondary)' }}>{selectedCandidate.predictedRoadmap.goal}</span>
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {selectedCandidate.predictedRoadmap.tasks.map((task, idx) => {
+                            const isCompleted = completedTasks[`${selectedCandidate.id}-${idx}`] || false;
+                            return (
+                              <div
+                                key={idx}
+                                onClick={() => toggleTask(selectedCandidate.id, idx)}
+                                className={`roadmap-step ${isCompleted ? 'completed' : ''}`}
+                              >
+                                <div className="roadmap-step-num">{isCompleted ? '✓' : idx + 1}</div>
+                                <span style={{ flex: 1, fontSize: '12.5px', color: isCompleted ? 'var(--text-secondary)' : '#fff', textDecoration: isCompleted ? 'line-through' : 'none' }}>
+                                  {task.name}
+                                </span>
+                                <span style={{ color: isCompleted ? 'var(--text-muted)' : 'var(--color-secondary)', fontFamily: 'var(--font-mono)', fontSize: '11px', flexShrink: 0 }}>
+                                  {task.duration}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
                     </div>
 
                   </div>
 
                 </div>
               )}
+
             </div>
           )}
-
         </div>
 
       </div>
 
-      {/* Floating AI Chat Side Button & Modal */}
-      <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999 }}>
-        {isChatOpen ? (
-          <div style={{ width: '380px', height: '520px', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }} className="animate-fade-in">
-            <div style={{ height: '100%', position: 'relative' }}>
-              <button 
-                onClick={() => setIsChatOpen(false)}
-                style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: '11px', cursor: 'pointer', zIndex: 10 }}
-              >
-                Minimize
-              </button>
-              <AIChat onSelectCandidate={(id) => {
-                setSelectedCandidateId(id);
-                setIsChatOpen(false);
-              }} aiName={aiName} />
-            </div>
-          </div>
-        ) : (
-          <button
-            onClick={() => setIsChatOpen(true)}
-            className="glow-btn-primary"
-            style={{ borderRadius: '50%', width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
-          >
-            <MessageSquare size={24} style={{ color: '#fff' }} />
-          </button>
-        )}
-      </div>
-
     </div>
   );
-};
-
-// Fallback constant just in case array index resolves empty
-const mockFallback: Candidate = {
-  id: "fall-1",
-  name: "Standby Profile",
-  title: "Candidate Profile",
-  avatar: "SP",
-  email: "standby@platform.ai",
-  background: "Initial search indexing standby",
-  completenessScore: 80,
-  resumeQualityScore: 80,
-  missingReport: [],
-  careerDNA: { Builder: 80, Innovator: 80, Researcher: 80, Leader: 80, Collaborator: 80, ProblemSolver: 80 },
-  matchScore: 80,
-  tag: 'Standard',
-  tagLabel: 'Standard Candidate',
-  tagReason: 'Standard matching data profile',
-  projectQuality: 80,
-  learningVelocity: 80,
-  futureReadiness6m: 80,
-  futureReadiness1y: 80,
-  predictedRoadmap: { goal: 'Full Stack Engineer', tasks: [] },
-  rankReason: "System initialization placeholder metadata."
 };

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { User, Sparkles, Building2 } from 'lucide-react';
+import { Sparkles, Files, CheckSquare, MessageSquare, Compass, Sun, Moon } from 'lucide-react';
 import { RecruiterDashboard } from './components/RecruiterDashboard';
+import { AIChatTab } from './components/AIChatTab';
+import { SourcesTab } from './components/SourcesTab';
 import { CandidateCoach } from './components/CandidateCoach';
 import type { Candidate } from './data/mockCandidates';
 import { mockCandidates } from './data/mockCandidates';
@@ -8,10 +10,18 @@ import { initializeRAGIndex, indexDocument } from './utils/ragEngine';
 
 function App() {
   const [candidates, setCandidates] = useState<Candidate[]>(mockCandidates);
-  const [viewMode, setViewMode] = useState<'recruiter' | 'candidate'>('recruiter');
+  const [activeTab, setActiveTab] = useState<'evaluator' | 'chat' | 'sources' | 'coach'>('evaluator');
   const [selectedCandidateId, setSelectedCandidateId] = useState<string>(mockCandidates[0].id);
   const [aiName, setAiName] = useState<string>('APTIV');
   const [isEditingName, setIsEditingName] = useState<boolean>(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    return (localStorage.getItem('aptiv-theme') as 'dark' | 'light') || 'dark';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('aptiv-theme', theme);
+  }, [theme]);
 
   // Initialize RAG database with candidate background texts
   useEffect(() => {
@@ -32,7 +42,7 @@ function App() {
 
     // Parse resume content keywords to auto-profile the candidate
     const text = content.toLowerCase();
-    let tag: 'Diamond' | 'Switcher' | 'Contributor' = 'Diamond';
+    let tag: 'Diamond' | 'Switcher' | 'Contributor' | 'Standard' = 'Diamond';
     let tagLabel = 'Diamond Portfolio';
     let tagReason = 'Strong practical portfolio matching candidate competencies.';
     let goal = 'Software Engineer';
@@ -118,7 +128,8 @@ function App() {
         alignItems: 'center', 
         borderRadius: '16px',
         flexWrap: 'wrap',
-        gap: '12px'
+        gap: '12px',
+        zIndex: 50
       }}>
         
         {/* Logo and Brand */}
@@ -130,125 +141,118 @@ function App() {
               width: '38px', 
               height: '38px', 
               borderRadius: '8px',
-              boxShadow: '0 0 15px rgba(6, 182, 212, 0.4)',
-              border: '1px solid rgba(255,255,255,0.1)'
+              boxShadow: 'var(--shadow-sm)',
+              border: '1px solid var(--border)'
             }} 
           />
           <div>
-            <h1 style={{ 
-              fontSize: '18px', 
-              fontWeight: 800, 
-              letterSpacing: '0.5px',
-              background: 'linear-gradient(to right, #fff, var(--text-secondary))',
+            <h1 style={{
+              fontSize: '20px',
+              fontWeight: 900,
+              letterSpacing: '2px',
+              background: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #0ea5e9 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               margin: 0
             }}>
               APTIV
             </h1>
-            <span style={{ fontSize: '10px', color: 'var(--color-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
-              AI-Powered Potential, Talent, Intelligence & Vision
+            <span style={{ fontSize: '9.5px', color: 'var(--color-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.2px', opacity: 0.8 }}>
+              AI Talent Intelligence &amp; Vision
             </span>
           </div>
         </div>
 
-        {/* View Switcher Controls */}
-        <div style={{ 
-          background: 'rgba(0, 0, 0, 0.2)', 
-          padding: '4px', 
-          borderRadius: '10px', 
-          border: '1px solid var(--border-color)',
-          display: 'flex',
-          gap: '4px'
-        }}>
+        {/* Center Pill Switcher - Direct Match to Figma Mockups */}
+        <div className="nav-pill-container">
           <button
-            onClick={() => setViewMode('recruiter')}
-            style={{
-              background: viewMode === 'recruiter' ? 'var(--color-primary)' : 'transparent',
-              border: 'none',
-              color: '#fff',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'all var(--transition-fast)'
-            }}
+            onClick={() => setActiveTab('evaluator')}
+            className={`nav-pill-button ${activeTab === 'evaluator' ? 'active' : ''}`}
           >
-            <Building2 size={14} />
+            <CheckSquare size={14} />
             Recruiter Dashboard
           </button>
           <button
-            onClick={() => setViewMode('candidate')}
-            style={{
-              background: viewMode === 'candidate' ? 'var(--color-primary)' : 'transparent',
-              border: 'none',
-              color: '#fff',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'all var(--transition-fast)'
-            }}
+            onClick={() => setActiveTab('chat')}
+            className={`nav-pill-button ${activeTab === 'chat' ? 'active' : ''}`}
           >
-            <User size={14} />
+            <MessageSquare size={14} />
+            AIVA AI
+          </button>
+          <button
+            onClick={() => setActiveTab('sources')}
+            className={`nav-pill-button ${activeTab === 'sources' ? 'active' : ''}`}
+          >
+            <Files size={14} />
+            AIVA RAG
+          </button>
+          <button
+            onClick={() => setActiveTab('coach')}
+            className={`nav-pill-button ${activeTab === 'coach' ? 'active' : ''}`}
+          >
+            <Compass size={14} />
             Candidate Coach
           </button>
         </div>
 
-        {/* AI Name Configurator */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.02)', padding: '6px 12px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-          <Sparkles size={14} style={{ color: 'var(--color-secondary)' }} />
-          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>AI Agent Name:</span>
-          {isEditingName ? (
-            <input 
-              type="text" 
-              value={aiName}
-              onChange={(e) => setAiName(e.target.value)}
-              onBlur={() => setIsEditingName(false)}
-              onKeyDown={(e) => { if (e.key === 'Enter') setIsEditingName(false); }}
-              autoFocus
-              style={{
-                background: 'var(--bg-main)',
-                border: '1px solid var(--color-primary)',
-                color: '#fff',
-                fontSize: '12px',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                width: '90px',
-                outline: 'none'
-              }}
-            />
-          ) : (
-            <span 
-              onClick={() => setIsEditingName(true)}
-              style={{ 
-                fontSize: '12.5px', 
-                fontWeight: 700, 
-                color: 'var(--color-primary)', 
-                cursor: 'pointer',
-                borderBottom: '1px dashed var(--color-primary)',
-                paddingBottom: '1px'
-              }}
-              title="Click to rename your AI Agent"
-            >
-              {aiName}
-            </span>
-          )}
+        {/* Right controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* AI Name Configurator */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '7px',
+            background: 'var(--bg-input)',
+            padding: '5px 12px',
+            borderRadius: '10px',
+            border: '1px solid var(--border-color)'
+          }}>
+            <Sparkles size={13} style={{ color: 'var(--color-secondary)' }} />
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Agent:</span>
+            {isEditingName ? (
+              <input
+                type="text"
+                value={aiName}
+                onChange={(e) => setAiName(e.target.value)}
+                onBlur={() => setIsEditingName(false)}
+                onKeyDown={(e) => { if (e.key === 'Enter') setIsEditingName(false); }}
+                autoFocus
+                className="input-base"
+                style={{ fontSize: '12px', padding: '2px 6px', width: '90px' }}
+              />
+            ) : (
+              <span
+                onClick={() => setIsEditingName(true)}
+                style={{
+                  fontSize: '12.5px',
+                  fontWeight: 700,
+                  color: 'var(--color-primary)',
+                  cursor: 'pointer',
+                  borderBottom: '1px dashed var(--color-primary)',
+                  paddingBottom: '1px'
+                }}
+                title="Click to rename your AI Agent"
+              >
+                {aiName}
+              </span>
+            )}
+          </div>
+
+          {/* Theme Toggle */}
+          <button
+            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+            className="theme-toggle"
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
         </div>
 
       </header>
 
       {/* Main View Display */}
       <main style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        {viewMode === 'recruiter' ? (
+        {activeTab === 'evaluator' && (
           <RecruiterDashboard 
             selectedCandidateId={selectedCandidateId}
             setSelectedCandidateId={setSelectedCandidateId}
@@ -256,7 +260,28 @@ function App() {
             candidates={candidates}
             onUploadCandidate={handleUploadCandidate}
           />
-        ) : (
+        )}
+        
+        {activeTab === 'chat' && (
+          <AIChatTab 
+            candidates={candidates}
+            aiName={aiName}
+            onSelectCandidate={(id) => {
+              setSelectedCandidateId(id);
+              setActiveTab('evaluator');
+            }}
+          />
+        )}
+
+        {activeTab === 'sources' && (
+          <SourcesTab 
+            candidates={candidates}
+            onUploadCandidate={handleUploadCandidate}
+            aiName={aiName}
+          />
+        )}
+
+        {activeTab === 'coach' && (
           <CandidateCoach 
             candidateId={selectedCandidateId}
             setCandidateId={setSelectedCandidateId}
@@ -266,13 +291,15 @@ function App() {
       </main>
 
       {/* Footer */}
-      <footer style={{ 
-        textAlign: 'center', 
-        padding: '16px', 
-        color: 'var(--text-muted)', 
-        fontSize: '12px', 
+      <footer style={{
+        textAlign: 'center',
+        padding: '14px',
+        color: 'var(--text-muted)',
+        fontSize: '11px',
         borderTop: '1px solid var(--border-color)',
-        marginTop: 'auto'
+        marginTop: 'auto',
+        background: 'var(--bg-surface)',
+        
       }}>
         APTIV &bull; Hackathon Version MVP &bull; AI-Powered Potential, Talent, Intelligence & Vision
       </footer>

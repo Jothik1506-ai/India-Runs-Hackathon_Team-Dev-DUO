@@ -53,7 +53,7 @@ export const CandidateCoach: React.FC<CandidateCoachProps> = ({ candidateId, set
                 borderRadius: '6px',
                 padding: '4px 10px',
                 fontSize: '11px',
-                color: '#fff',
+                color: 'var(--text-primary)',
                 cursor: 'pointer',
                 transition: 'all var(--transition-fast)'
               }}
@@ -72,7 +72,7 @@ export const CandidateCoach: React.FC<CandidateCoachProps> = ({ candidateId, set
           
           {/* Stage 1: AI Profile Audit Overview */}
           <div className="glass-panel" style={{ padding: '20px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Award size={18} style={{ color: 'var(--color-secondary)' }} />
               AI PROFILE SCREENING AUDIT
             </h3>
@@ -101,7 +101,7 @@ export const CandidateCoach: React.FC<CandidateCoachProps> = ({ candidateId, set
                   </div>
                 </div>
                 <div>
-                  <h5 style={{ fontSize: '14px', color: '#fff', fontWeight: 600 }}>Completeness Score</h5>
+                  <h5 style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: 600 }}>Completeness Score</h5>
                   <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Percentage of relevant index criteria met</span>
                 </div>
               </div>
@@ -128,7 +128,7 @@ export const CandidateCoach: React.FC<CandidateCoachProps> = ({ candidateId, set
                   </div>
                 </div>
                 <div>
-                  <h5 style={{ fontSize: '14px', color: '#fff', fontWeight: 600 }}>Resume Quality</h5>
+                  <h5 style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: 600 }}>Resume Quality</h5>
                   <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Semantic formatting & impact index</span>
                 </div>
               </div>
@@ -157,7 +157,7 @@ export const CandidateCoach: React.FC<CandidateCoachProps> = ({ candidateId, set
           <div className="glass-panel" style={{ padding: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#fff' }}>UPSKILLING TARGET: {selectedCandidate.predictedRoadmap.goal}</h3>
+                <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)' }}>UPSKILLING TARGET: {selectedCandidate.predictedRoadmap.goal}</h3>
                 <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Follow this dynamic roadmap to boost eligibility index to 87%+ within 6 months</p>
               </div>
               <div style={{ background: 'var(--color-primary-glow)', border: '1px solid var(--color-primary)', color: 'var(--text-primary)', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold' }}>
@@ -210,7 +210,7 @@ export const CandidateCoach: React.FC<CandidateCoachProps> = ({ candidateId, set
                         <span style={{ fontSize: '10px', color: 'var(--color-secondary)', fontWeight: 'bold', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>
                           STEP {idx + 1}
                         </span>
-                        <h4 style={{ fontSize: '13.5px', fontWeight: 600, color: '#fff', textDecoration: isCompleted ? 'line-through' : 'none' }}>
+                        <h4 style={{ fontSize: '13.5px', fontWeight: 600, color: 'var(--text-primary)', textDecoration: isCompleted ? 'line-through' : 'none' }}>
                           {task.name}
                         </h4>
                       </div>

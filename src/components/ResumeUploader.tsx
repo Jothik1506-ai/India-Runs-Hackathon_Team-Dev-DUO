@@ -240,7 +240,7 @@ export const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onUploadCandidat
             <FileUp size={36} style={{ color: 'var(--color-secondary)', opacity: 0.8 }} />
           )}
           <div>
-            <p style={{ fontSize: '13.5px', fontWeight: 600, color: '#fff' }}>
+            <p style={{ fontSize: '13.5px', fontWeight: 600, color: 'var(--text-primary)' }}>
               {isProcessing ? 'Processing files...' : 'Drag & Drop files or Browse'}
             </p>
             <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
