@@ -128,7 +128,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ candidates }) => {
                     <span>90% - 100% (High Eligibility)</span>
                     <span style={{ fontFamily: 'var(--font-mono)' }}>{candidates.filter(c => c.matchScore >= 90).length} Candidates</span>
                   </div>
-                  <div style={{ background: 'rgba(255,255,255,0.03)', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ background: 'var(--border)', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
                     <div style={{ background: 'var(--color-primary)', width: `${(candidates.filter(c => c.matchScore >= 90).length / totalProfiles) * 100}%`, height: '100%' }}></div>
                   </div>
                 </div>
@@ -138,7 +138,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ candidates }) => {
                     <span>80% - 89% (Solid Matches)</span>
                     <span style={{ fontFamily: 'var(--font-mono)' }}>{candidates.filter(c => c.matchScore >= 80 && c.matchScore < 90).length} Candidates</span>
                   </div>
-                  <div style={{ background: 'rgba(255,255,255,0.03)', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ background: 'var(--border)', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
                     <div style={{ background: 'var(--color-secondary)', width: `${(candidates.filter(c => c.matchScore >= 80 && c.matchScore < 90).length / totalProfiles) * 100}%`, height: '100%' }}></div>
                   </div>
                 </div>
@@ -148,7 +148,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ candidates }) => {
                     <span>70% - 79% (Developing Match)</span>
                     <span style={{ fontFamily: 'var(--font-mono)' }}>{candidates.filter(c => c.matchScore >= 70 && c.matchScore < 80).length} Candidates</span>
                   </div>
-                  <div style={{ background: 'rgba(255,255,255,0.03)', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ background: 'var(--border)', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
                     <div style={{ background: 'var(--color-warning)', width: `${(candidates.filter(c => c.matchScore >= 70 && c.matchScore < 80).length / totalProfiles) * 100}%`, height: '100%' }}></div>
                   </div>
                 </div>
@@ -197,7 +197,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ candidates }) => {
               <Compass size={14} style={{ color: 'var(--color-secondary)' }} />
               AVERAGE TALENT POOL DNA
             </h4>
-            <div style={{ background: 'rgba(0, 0, 0, 0.2)', borderRadius: '12px', padding: '10px', border: '1px solid var(--border-color)' }}>
+            <div style={{ background: 'var(--bg-raised)', borderRadius: '12px', padding: '10px', border: '1px solid var(--border-color)' }}>
               <RadarChart data={avgDNA} />
             </div>
             <p style={{ fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'center', marginTop: '10px' }}>

@@ -104,7 +104,7 @@ const DimensionRow: React.FC<{ name: string; dim: DNADimension }> = ({ name, dim
 
       {/* Expanded evidence panel */}
       {expanded && (
-        <div style={{ borderTop: '1px solid var(--border-color)', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px', background: 'rgba(0,0,0,0.12)' }}>
+        <div style={{ borderTop: '1px solid var(--border-color)', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px', background: 'var(--bg-raised)' }}>
 
           {/* Supporting Evidence */}
           {dim.evidence.length > 0 && (

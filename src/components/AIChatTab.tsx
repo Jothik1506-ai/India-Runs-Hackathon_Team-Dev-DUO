@@ -201,7 +201,7 @@ export const AIChatTab: React.FC<AIChatTabProps> = ({ candidates, aiName, onSele
       <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
         
         {/* Header bar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 18px', borderBottom: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.15)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 18px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-raised)' }}>
           <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(139,92,246,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(139,92,246,0.4)', boxShadow: '0 0 16px rgba(139,92,246,0.2)', padding: '5px' }}>
             <img src="/aiva-logo.png" alt="AIVA" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
@@ -247,13 +247,13 @@ export const AIChatTab: React.FC<AIChatTabProps> = ({ candidates, aiName, onSele
                   fontSize: '13px',
                   lineHeight: '1.6',
                   whiteSpace: 'pre-line',
-                  color: msg.sender === 'user' ? '#fff' : 'var(--text-primary)'
+                  color: 'var(--text-primary)'
                 }}>
                   {msg.text}
 
                   {/* Candidate Quick Links inside responses */}
                   {msg.matchedCandidates && msg.matchedCandidates.length > 0 && (
-                    <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '6px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '10px' }}>
+                    <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '6px', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
                       {msg.matchedCandidates.map(c => (
                         <button
                           key={c.id}

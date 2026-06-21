@@ -236,7 +236,7 @@ export const CandidateCoach: React.FC<CandidateCoachProps> = ({ candidateId, set
               <Target size={14} style={{ color: 'var(--color-secondary)' }} />
               AIVA CAREER DNA PROFILE
             </h4>
-            <div style={{ background: 'rgba(0, 0, 0, 0.15)', borderRadius: '12px', padding: '6px', border: '1px solid var(--border-color)' }}>
+            <div style={{ background: 'var(--bg-raised)', borderRadius: '12px', padding: '6px', border: '1px solid var(--border-color)' }}>
               <RadarChart data={selectedCandidate.careerDNA} />
             </div>
             <p style={{ fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'center', marginTop: '10px' }}>

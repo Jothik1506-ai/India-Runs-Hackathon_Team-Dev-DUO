@@ -86,7 +86,7 @@ export const RadarChart: React.FC<RadarChartProps> = ({ data }) => {
             key={idx}
             points={points}
             fill="none"
-            stroke="rgba(255, 255, 255, 0.08)"
+            stroke="var(--border-strong)"
             strokeWidth="1"
           />
         ))}
@@ -101,7 +101,7 @@ export const RadarChart: React.FC<RadarChartProps> = ({ data }) => {
               y1={cy}
               x2={outer.x}
               y2={outer.y}
-              stroke="rgba(255, 255, 255, 0.08)"
+              stroke="var(--border-strong)"
               strokeWidth="1"
             />
           );
