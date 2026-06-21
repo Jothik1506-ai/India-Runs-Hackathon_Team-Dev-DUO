@@ -61,9 +61,11 @@ export const scoreResume = (_name: string, content: string): ScoredResume => {
 
   // ─── PROJECT SIGNALS ────────────────────────────────────────────────────
 
-  // Count explicit project headings/titles to avoid "project management" false positives
-  const projectMatches = (content.match(/project\s*[:–\-\n]|project\s*\d|project\s*title/gi) || []);
-  const projectCount = Math.min(projectMatches.length, 10);
+  // Count projects: explicit headings OR build-verb bullet count as fallback
+  const explicitProjectMatches = (content.match(/project\s*[:–\-\n]|project\s*\d|project\s*title|mini.?project|capstone|final.?year.?project/gi) || []).length;
+  const buildVerbCount = (content.match(/\b(built|developed|created|implemented|engineered|designed and (deployed|built|created))\b/gi) || []).length;
+  const buildInferredCount = buildVerbCount >= 6 ? 4 : buildVerbCount >= 4 ? 3 : buildVerbCount >= 2 ? 2 : buildVerbCount >= 1 ? 1 : 0;
+  const projectCount = Math.min(Math.max(explicitProjectMatches, buildInferredCount), 10);
   const hasDeployments = /deployed|live at|production|hosted on|vercel|netlify|heroku|render/i.test(content);
   const hasQuantifiedAchievements = /\b\d+[\s%+×x]\s*(users|accuracy|reduction|improvement|increase|decrease|faster|ms|requests|records|stars)/i.test(content);
   const hasDetailedProjectDesc = projectCount >= 1 && content.length > 600;
@@ -94,7 +96,7 @@ export const scoreResume = (_name: string, content: string): ScoredResume => {
   const hasOSS         = /open.?source|contributor|pull request|merged pr|maintained/i.test(content);
   const internCount    = (text.match(/intern(?:ship)?/g) || []).length;
   const hasExperience  = internCount > 0 || /years?.+experience|experience.+years?|work experience/i.test(content);
-  const leaderMentions = (text.match(/led\s|managed|mentored|founded|organized\s|president|head of|team lead/gi) || []).length;
+  const leaderMentions = (text.match(/\bfounded\b|\bfounder\b|led\s|managed|mentored|organized\s|president|head of|team lead/gi) || []).length;
 
   // ─── COMPLETENESS SCORE ─────────────────────────────────────────────────
   // What profile surface area does a recruiter have to evaluate?
@@ -262,11 +264,10 @@ export const scoreResume = (_name: string, content: string): ScoredResume => {
   // ─── TAG ASSIGNMENT (strict evidence-based) ─────────────────────────────
   // OSS Contributor: requires BOTH explicit GitHub URL AND OSS evidence
   const isOSSContributor = hasGitHub && hasOSS;
-  // Career Switcher: explicit pivot language OR ECE/Mech with AI work
+  // Career Switcher: only explicit pivot language counts.
+  // ECE/Mech + AI is NOT a switch in the Indian education system — it's a standard Diploma→B.Tech pathway.
   const isSwitcher =
-    /\b(pivoted|switching|transitioned|career change)\b/i.test(content)
-    || (/\b(mechanical|civil|electrical|ece|electronics)\b/i.test(content)
-        && /\b(machine learning|ai|deep learning|data science|software developer)\b/i.test(content));
+    /\b(pivoted|switching|transitioned|career change|career pivot)\b/i.test(content);
   // Diamond: strong academics (8.5+ CGPA or Masters/PhD) but NO GitHub/LinkedIn/portfolio
   const isDiamond = !hasGitHub && !hasLinkedIn && cgpa !== null && cgpa >= 8.5 && (hasBachelors || hasMasters || hasPhD);
   // Researcher: PhD or research papers or thesis
@@ -284,14 +285,15 @@ export const scoreResume = (_name: string, content: string): ScoredResume => {
     tag = 'Contributor';
     tagLabel = 'Research Expert';
     tagReason = 'Academic research background with published work or thesis evidence.';
-  } else if (isSwitcher) {
-    tag = 'Switcher';
-    tagLabel = 'Career Switcher';
-    tagReason = 'Evidence of transitioning from a non-CS field into technical roles.';
   } else if (isDiamond) {
+    // Diamond checked before Switcher — strong academics with no online presence is a stronger signal
     tag = 'Diamond';
     tagLabel = 'Hidden Academic Gem';
     tagReason = `Strong CGPA (${cgpa}) but missing GitHub, LinkedIn, and portfolio — classic hidden potential candidate.`;
+  } else if (isSwitcher) {
+    tag = 'Switcher';
+    tagLabel = 'Career Switcher';
+    tagReason = 'Explicit career pivot language detected — transitioning into a technical role.';
   }
 
   // ─── GOAL DETECTION ─────────────────────────────────────────────────────

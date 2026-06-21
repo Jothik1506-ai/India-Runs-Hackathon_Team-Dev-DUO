@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Resumes and temporary document files
+*Resume*
+Jothik Kanth.pdf
+~$*.docx
+
