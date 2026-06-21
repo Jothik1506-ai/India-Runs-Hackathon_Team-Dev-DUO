@@ -244,8 +244,8 @@ export const SourcesTab: React.FC<SourcesTabProps> = ({ candidates, onUploadCand
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '9px 11px',
-                  background: isChecked ? 'rgba(6,182,212,0.04)' : 'rgba(255,255,255,0.01)',
-                  border: `1px solid ${isChecked ? 'rgba(6,182,212,0.2)' : 'rgba(255,255,255,0.04)'}`,
+                  background: isChecked ? 'rgba(6,182,212,0.06)' : 'transparent',
+                  border: `1px solid ${isChecked ? 'rgba(6,182,212,0.25)' : 'var(--border-color)'}`,
                   borderRadius: '8px',
                   cursor: 'pointer',
                   transition: 'all var(--transition-fast)',
@@ -257,11 +257,11 @@ export const SourcesTab: React.FC<SourcesTabProps> = ({ candidates, onUploadCand
                     {isChecked ? <CheckCircle2 size={14} /> : <Circle size={14} />}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '7px', overflow: 'hidden' }}>
-                    <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: isChecked ? 'rgba(6,182,212,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${isChecked ? 'rgba(6,182,212,0.2)' : 'var(--border-color)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: isChecked ? 'rgba(6,182,212,0.1)' : 'var(--bg-input)', border: `1px solid ${isChecked ? 'rgba(6,182,212,0.2)' : 'var(--border-color)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <FileText size={13} style={{ color: isChecked ? 'var(--color-secondary)' : 'var(--text-muted)' }} />
                     </div>
                     <div style={{ overflow: 'hidden' }}>
-                      <span style={{ fontSize: '12px', color: isChecked ? '#fff' : 'var(--text-secondary)', display: 'block', fontWeight: isChecked ? 600 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <span style={{ fontSize: '12px', color: isChecked ? 'var(--text-primary)' : 'var(--text-secondary)', display: 'block', fontWeight: isChecked ? 600 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {c.name}_resume.pdf
                       </span>
                       {c.tag !== 'Standard' && (
@@ -335,7 +335,7 @@ export const SourcesTab: React.FC<SourcesTabProps> = ({ candidates, onUploadCand
                   padding: '12px 16px',
                   fontSize: '13px',
                   lineHeight: '1.6',
-                  color: msg.sender === 'user' ? '#fff' : 'var(--text-primary)'
+                  color: 'var(--text-primary)'
                 }}>
                   <div style={{ whiteSpace: 'pre-line' }}>{msg.text}</div>
                   

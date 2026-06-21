@@ -523,7 +523,7 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
                                 className={`roadmap-step ${isCompleted ? 'completed' : ''}`}
                               >
                                 <div className="roadmap-step-num">{isCompleted ? '✓' : idx + 1}</div>
-                                <span style={{ flex: 1, fontSize: '12.5px', color: isCompleted ? 'var(--text-secondary)' : '#fff', textDecoration: isCompleted ? 'line-through' : 'none' }}>
+                                <span style={{ flex: 1, fontSize: '12.5px', color: isCompleted ? 'var(--text-secondary)' : 'var(--text-primary)', textDecoration: isCompleted ? 'line-through' : 'none' }}>
                                   {task.name}
                                 </span>
                                 <span style={{ color: isCompleted ? 'var(--text-muted)' : 'var(--color-secondary)', fontFamily: 'var(--font-mono)', fontSize: '11px', flexShrink: 0 }}>
