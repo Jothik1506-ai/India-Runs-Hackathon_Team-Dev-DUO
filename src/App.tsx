@@ -6,14 +6,13 @@ import { AIChatTab } from './components/AIChatTab';
 import { SourcesTab } from './components/SourcesTab';
 import { CandidateCoach } from './components/CandidateCoach';
 import type { Candidate } from './data/mockCandidates';
-import { mockCandidates } from './data/mockCandidates';
-import { initializeRAGIndex, indexDocument } from './utils/ragEngine';
+import { indexDocument } from './utils/ragEngine';
 import { scoreResume, generateRoadmap } from './utils/resumeScorer';
 
 function App() {
-  const [candidates, setCandidates] = useState<Candidate[]>(mockCandidates);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [activeTab, setActiveTab] = useState<'evaluator' | 'chat' | 'sources' | 'coach'>('evaluator');
-  const [selectedCandidateId, setSelectedCandidateId] = useState<string>(mockCandidates[0].id);
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string>('');
   const [aiName, setAiName] = useState<string>('APTIV');
   const [isEditingName, setIsEditingName] = useState<boolean>(false);
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -24,11 +23,6 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('aptiv-theme', theme);
   }, [theme]);
-
-  // Initialize RAG database with candidate background texts
-  useEffect(() => {
-    initializeRAGIndex(candidates);
-  }, []);
 
   // RAG Resume Ingestion Handler — honest evidence-based scoring (no Math.random inflation)
   const handleUploadCandidate = (name: string, content: string) => {

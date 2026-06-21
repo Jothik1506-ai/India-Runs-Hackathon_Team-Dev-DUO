@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
-import { Target, BrainCircuit, ShieldCheck, Upload, Globe } from 'lucide-react';
+import { Target, BrainCircuit, ShieldCheck, Upload, Globe, FileUp } from 'lucide-react';
 import type { Candidate } from '../data/mockCandidates';
 import { RadarChart } from './RadarChart';
 import { ResumeUploader } from './ResumeUploader';
@@ -78,7 +78,7 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
       {/* Upper Panel Quick Info & Action Bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {['ALL', 'HIDDEN', 'Diamond', 'Switcher', 'Contributor'].map((tag) => (
+          {candidates.length > 0 && ['ALL', 'HIDDEN', 'Diamond', 'Switcher', 'Contributor'].map((tag) => (
             <button
               key={tag}
               onClick={() => setFilterTag(tag)}
@@ -101,14 +101,16 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
           ))}
         </div>
 
-        <button 
-          onClick={() => setIsUploaderOpen(!isUploaderOpen)}
-          className="glow-btn-secondary"
-          style={{ fontSize: '12px', padding: '8px 16px', borderRadius: '8px' }}
-        >
-          <Upload size={14} />
-          {isUploaderOpen ? 'Close Uploader' : 'Upload Resumes'}
-        </button>
+        {candidates.length > 0 && (
+          <button
+            onClick={() => setIsUploaderOpen(!isUploaderOpen)}
+            className="glow-btn-secondary"
+            style={{ fontSize: '12px', padding: '8px 16px', borderRadius: '8px' }}
+          >
+            <Upload size={14} />
+            {isUploaderOpen ? 'Close Uploader' : 'Upload Resumes'}
+          </button>
+        )}
       </div>
 
       {/* RAG Upload Widget collapsible drawer */}
@@ -122,7 +124,79 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
         </div>
       )}
 
+      {/* Empty State — no resumes uploaded yet */}
+      {candidates.length === 0 && !isUploaderOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+          style={{
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '24px',
+            padding: '60px 20px',
+            textAlign: 'center',
+          }}
+        >
+          {/* Icon Ring */}
+          <div style={{
+            width: '88px',
+            height: '88px',
+            borderRadius: '50%',
+            border: '1px solid rgba(139,92,246,0.35)',
+            boxShadow: '0 0 40px rgba(139,92,246,0.15), 0 0 80px rgba(139,92,246,0.06)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(139,92,246,0.06)',
+          }}>
+            <FileUp size={36} style={{ color: 'var(--color-primary)', opacity: 0.85 }} />
+          </div>
+
+          {/* Headline */}
+          <div>
+            <h2 style={{
+              fontSize: '22px',
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              margin: '0 0 8px 0',
+              letterSpacing: '-0.3px',
+            }}>
+              No resumes yet
+            </h2>
+            <p style={{
+              fontSize: '14px',
+              color: 'var(--text-secondary)',
+              lineHeight: 1.6,
+              maxWidth: '380px',
+              margin: '0 auto',
+            }}>
+              Upload your resume and AIVA will score it, generate your Career DNA, and build a personalised growth roadmap for you.
+            </p>
+          </div>
+
+          {/* CTA Button */}
+          <button
+            onClick={() => setIsUploaderOpen(true)}
+            className="glow-btn-secondary"
+            style={{ fontSize: '14px', padding: '12px 28px', borderRadius: '10px', gap: '8px' }}
+          >
+            <Upload size={16} />
+            Upload Your Resume
+          </button>
+
+          {/* Supported formats hint */}
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.3px' }}>
+            Supports PDF, DOCX, and TXT — parsed instantly by AIVA
+          </p>
+        </motion.div>
+      )}
+
       {/* Main Grid: Sidebar + Candidate Details */}
+      {candidates.length > 0 && (
       <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: '20px', flexGrow: 1, alignItems: 'stretch' }}>
         
         {/* Left column - Rankings & Talent Pool */}
@@ -473,6 +547,7 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
         </div>
 
       </div>
+      )}
 
     </div>
   );
