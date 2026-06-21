@@ -1,8 +1,30 @@
 import React, { useState } from 'react';
+import { motion, type Variants } from 'framer-motion';
 import { Target, BrainCircuit, ShieldCheck, Upload, Globe } from 'lucide-react';
 import type { Candidate } from '../data/mockCandidates';
 import { RadarChart } from './RadarChart';
 import { ResumeUploader } from './ResumeUploader';
+import { DNAEvidencePanel } from './DNAEvidencePanel';
+
+const listVariants: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.045, delayChildren: 0.05 } },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, x: -8 },
+  visible: { opacity: 1, x: 0 },
+};
+
+const metricsVariants: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.07, delayChildren: 0.1 } },
+};
+
+const metricItemVariants: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0 },
+};
 
 interface RecruiterDashboardProps {
   selectedCandidateId: string;
@@ -23,6 +45,7 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
   const [compareMode, setCompareMode] = useState<boolean>(false);
   const [compareId, setCompareId] = useState<string>(candidates[1]?.id || 'cand-2');
   const [isUploaderOpen, setIsUploaderOpen] = useState<boolean>(false);
+  const [dnaView, setDnaView] = useState<'radar' | 'evidence'>('radar');
   
   // Track checklist tasks completed by candidate
   const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});
@@ -107,7 +130,12 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
           <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: '12px', letterSpacing: '0.5px' }}>
             RANKED APPLICANTS ({rankedCandidates.length})
           </span>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <motion.div
+            variants={listVariants}
+            initial="hidden"
+            animate="visible"
+            style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}
+          >
             {rankedCandidates.map((c, index) => {
               const isSelected = c.id === selectedCandidateId;
               const avatarRing = c.tag === 'Diamond' ? 'avatar-ring-diamond' : c.tag === 'Switcher' ? 'avatar-ring-switcher' : c.tag === 'Contributor' ? 'avatar-ring-contributor' : 'avatar-ring-standard';
@@ -115,17 +143,19 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
               const avatarBg = c.tag === 'Diamond' ? 'rgba(139,92,246,0.12)' : c.tag === 'Switcher' ? 'rgba(244,63,94,0.12)' : c.tag === 'Contributor' ? 'rgba(6,182,212,0.12)' : 'rgba(255,255,255,0.05)';
               const avatarColor = c.tag === 'Diamond' ? '#c4b5fd' : c.tag === 'Switcher' ? '#fda4af' : c.tag === 'Contributor' ? '#67e8f9' : 'var(--text-secondary)';
               return (
-                <div
+                <motion.div
                   key={c.id}
+                  variants={itemVariants}
                   onClick={() => setSelectedCandidateId(c.id)}
                   className={isSelected ? 'candidate-item-selected' : ''}
+                  whileHover={isSelected ? {} : { x: 2, backgroundColor: 'rgba(255,255,255,0.025)' }}
                   style={{
                     background: isSelected ? undefined : 'rgba(255,255,255,0.015)',
                     border: isSelected ? undefined : '1px solid var(--border-color)',
                     borderRadius: '10px',
                     padding: '10px 12px',
                     cursor: 'pointer',
-                    transition: 'all var(--transition-fast)',
+                    transition: 'border-color var(--transition-fast), box-shadow var(--transition-fast)',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '8px'
@@ -173,10 +203,10 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
                       style={{ width: `${c.matchScore}%`, background: c.tag === 'Switcher' ? 'linear-gradient(90deg, #be185d, #f43f5e, #fb7185)' : undefined }}
                     />
                   </div>
-                </div>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         </div>
 
         {/* Right column - Candidate Details & Comparison panel */}
@@ -255,7 +285,7 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
                     </div>
                     <RadarChart data={selectedCandidate.careerDNA} />
                     <div className="insight-panel insight-panel-purple" style={{ marginTop: '12px' }}>
-                      <strong style={{ fontSize: '11px', color: 'var(--color-primary)' }}>AI Insights:</strong>
+                      <strong style={{ fontSize: '11px', color: 'var(--color-primary)' }}>AIVA Insights:</strong>
                       <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.45' }}>{selectedCandidate.rankReason}</p>
                     </div>
                   </div>
@@ -297,8 +327,13 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   
                   {/* Candidate Metrics Cards */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-                    <div className="metric-card-cyan" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <motion.div
+                    variants={metricsVariants}
+                    initial="hidden"
+                    animate="visible"
+                    style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}
+                  >
+                    <motion.div variants={metricItemVariants} className="metric-card-cyan" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       <span className="section-label" style={{ color: 'var(--color-secondary)' }}>
                         <ShieldCheck size={11} style={{ color: 'var(--color-secondary)' }} />
                         Profile Complete
@@ -307,8 +342,8 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
                       <div className="progress-bar-track">
                         <div className="progress-bar-fill progress-bar-fill-cyan" style={{ width: `${selectedCandidate.completenessScore}%` }} />
                       </div>
-                    </div>
-                    <div className="metric-card-purple" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    </motion.div>
+                    <motion.div variants={metricItemVariants} className="metric-card-purple" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       <span className="section-label" style={{ color: 'var(--color-primary)' }}>
                         <BrainCircuit size={11} style={{ color: 'var(--color-primary)' }} />
                         Resume Quality
@@ -317,8 +352,8 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
                       <div className="progress-bar-track">
                         <div className="progress-bar-fill progress-bar-fill-purple" style={{ width: `${selectedCandidate.resumeQualityScore}%` }} />
                       </div>
-                    </div>
-                    <div className="metric-card-green" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    </motion.div>
+                    <motion.div variants={metricItemVariants} className="metric-card-green" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       <span className="section-label" style={{ color: 'var(--color-success)' }}>
                         <Target size={11} style={{ color: 'var(--color-success)' }} />
                         Learning Velocity
@@ -327,20 +362,36 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
                       <div className="progress-bar-track">
                         <div className="progress-bar-fill progress-bar-fill-green" style={{ width: `${selectedCandidate.learningVelocity}%` }} />
                       </div>
-                    </div>
-                  </div>
+                    </motion.div>
+                  </motion.div>
 
                   {/* Dual Panel details */}
                   <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '24px', alignItems: 'start' }}>
                     
                     {/* DNA Profile (Left) */}
                     <div>
-                      <h4 style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Target size={14} style={{ color: 'var(--color-secondary)' }} />
-                        CAREER DNA PROFILE
-                      </h4>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <h4 style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                          <Target size={14} style={{ color: 'var(--color-secondary)' }} />
+                          CAREER DNA PROFILE
+                        </h4>
+                        <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-input)', borderRadius: '7px', padding: '3px' }}>
+                          <button
+                            onClick={() => setDnaView('radar')}
+                            style={{ fontSize: '10px', padding: '3px 9px', borderRadius: '5px', border: 'none', cursor: 'pointer', background: dnaView === 'radar' ? 'var(--color-primary)' : 'transparent', color: dnaView === 'radar' ? '#fff' : 'var(--text-muted)', fontWeight: 600, transition: 'all var(--transition-fast)' }}
+                          >Radar</button>
+                          <button
+                            onClick={() => setDnaView('evidence')}
+                            style={{ fontSize: '10px', padding: '3px 9px', borderRadius: '5px', border: 'none', cursor: 'pointer', background: dnaView === 'evidence' ? 'var(--color-primary)' : 'transparent', color: dnaView === 'evidence' ? '#fff' : 'var(--text-muted)', fontWeight: 600, transition: 'all var(--transition-fast)' }}
+                          >Evidence</button>
+                        </div>
+                      </div>
                       <div style={{ background: 'var(--bg-input)', borderRadius: '12px', padding: '12px', border: '1px solid var(--border-color)' }}>
-                        <RadarChart data={selectedCandidate.careerDNA} />
+                        {dnaView === 'radar' ? (
+                          <RadarChart data={selectedCandidate.careerDNA} />
+                        ) : (
+                          <DNAEvidencePanel candidate={selectedCandidate} />
+                        )}
                       </div>
                     </div>
 
@@ -351,7 +402,7 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
                       <div className="insight-panel insight-panel-cyan">
                         <h4 className="section-label" style={{ color: 'var(--color-secondary)', marginBottom: '10px' }}>
                           <ShieldCheck size={12} />
-                          FUTURE READINESS PROJECTIONS
+                          AIVA FUTURE READINESS PROJECTIONS
                         </h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                           {[
@@ -376,7 +427,7 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({
                       <div className="insight-panel insight-panel-purple">
                         <h4 className="section-label" style={{ color: 'var(--color-primary)', marginBottom: '8px' }}>
                           <BrainCircuit size={12} />
-                          EXPLAINABLE RANK REASONING
+                          AIVA EXPLAINABLE RANK REASONING
                         </h4>
                         <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.55' }}>
                           {selectedCandidate.rankReason}

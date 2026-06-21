@@ -46,7 +46,7 @@ export const JDToJD: React.FC<JDToJDProps> = ({ candidates, onSelectCandidate })
   };
 
   const createNewRole = () => {
-    const newId = `j-${Date.now()}`;
+    const newId = crypto.randomUUID();
     const newRole: JobRole = {
       id: newId,
       title: 'New Custom Role',

@@ -7,6 +7,42 @@ export interface CareerDNA {
   ProblemSolver: number;
 }
 
+// Pre-defined evidence bundles for DNA Engine 2.0
+export interface CandidateEvidenceBundle {
+  github?: {
+    repoCount: number;
+    commitFrequency: 'High' | 'Medium' | 'Low' | 'None';
+    stars: number;
+    forks: number;
+    languages: string[];
+    hasOSSContributions: boolean;
+    projectComplexity: 'Enterprise' | 'Mid' | 'Basic';
+    readmeQuality: 'High' | 'Medium' | 'Low';
+  };
+  linkedin?: {
+    yearsExperience: number;
+    hasRecommendations: boolean;
+    certificationCount: number;
+    hasConsistentProgression: boolean;
+    internshipCount: number;
+  };
+  portfolio?: {
+    projectCount: number;
+    hasDeployedApps: boolean;
+    hasCaseStudies: boolean;
+    hasTechnicalDocs: boolean;
+  };
+  resume?: {
+    hasEducation: boolean;
+    educationLevel: 'PhD' | 'Masters' | 'Bachelors' | 'Bootcamp' | 'SelfTaught' | 'None';
+    certifications: string[];
+    hackathonCount: number;
+    leadershipMentions: number;
+    skillsListed: string[];
+    projectsInResume: number;
+  };
+}
+
 export interface RoadmapTask {
   name: string;
   duration: string;
@@ -39,6 +75,8 @@ export interface Candidate {
   githubUrl?: string;
   linkedinUrl?: string;
   portfolioUrl?: string;
+  // Career DNA Engine 2.0 — pre-defined evidence bundles for mock candidates
+  evidenceBundle?: CandidateEvidenceBundle;
 }
 
 export const mockCandidates: Candidate[] = [
@@ -83,7 +121,13 @@ export const mockCandidates: Candidate[] = [
     rankReason: "Alex ranks higher due to a phenomenal Learning Velocity (95%) and high project quality (92%) despite lacking a traditional CS degree. The DNA profile highlights top-tier Builder and Problem Solver capabilities.",
     githubUrl: "github.com/alexrivera-ai",
     linkedinUrl: "linkedin.com/in/alex-rivera-pivots",
-    portfolioUrl: "alexrivera.dev"
+    portfolioUrl: "alexrivera.dev",
+    evidenceBundle: {
+      github: { repoCount: 18, commitFrequency: 'High', stars: 340, forks: 42, languages: ['Python', 'LangChain', 'TypeScript', 'Rust'], hasOSSContributions: true, projectComplexity: 'Enterprise', readmeQuality: 'High' },
+      linkedin: { yearsExperience: 1, hasRecommendations: false, certificationCount: 0, hasConsistentProgression: false, internshipCount: 0 },
+      portfolio: { projectCount: 5, hasDeployedApps: true, hasCaseStudies: true, hasTechnicalDocs: true },
+      resume: { hasEducation: true, educationLevel: 'SelfTaught', certifications: [], hackathonCount: 2, leadershipMentions: 1, skillsListed: ['Python', 'LangChain', 'LlamaIndex', 'Rust', 'TypeScript'], projectsInResume: 6 }
+    }
   },
   {
     id: "cand-2",
@@ -124,7 +168,12 @@ export const mockCandidates: Candidate[] = [
     },
     rankReason: "Lana outperforms peers with formal degrees because of her outstanding portfolio quality (94%) and robust practical Builder score (96%). Traditional ATS filter she fails is bypassed by her Career DNA signature.",
     githubUrl: "github.com/lanachen-codes",
-    portfolioUrl: "lanachen.codes"
+    portfolioUrl: "lanachen.codes",
+    evidenceBundle: {
+      github: { repoCount: 22, commitFrequency: 'High', stars: 180, forks: 28, languages: ['TypeScript', 'React', 'Next.js', 'CSS', 'Node.js'], hasOSSContributions: false, projectComplexity: 'Mid', readmeQuality: 'High' },
+      portfolio: { projectCount: 8, hasDeployedApps: true, hasCaseStudies: true, hasTechnicalDocs: false },
+      resume: { hasEducation: false, educationLevel: 'SelfTaught', certifications: [], hackathonCount: 1, leadershipMentions: 0, skillsListed: ['React', 'TypeScript', 'Next.js', 'Node.js', 'Figma'], projectsInResume: 8 }
+    }
   },
   {
     id: "cand-3",
@@ -164,7 +213,11 @@ export const mockCandidates: Candidate[] = [
       ]
     },
     rankReason: "Marcus holds the highest technical project score (98%) and Collaborator DNA (95%). Traditional ATS would penalize his short resume, but Career DNA highlights his massive actual code footprint.",
-    githubUrl: "github.com/marcus-codes"
+    githubUrl: "github.com/marcus-codes",
+    evidenceBundle: {
+      github: { repoCount: 38, commitFrequency: 'High', stars: 8200, forks: 640, languages: ['JavaScript', 'TypeScript', 'Node.js', 'Go', 'Rust'], hasOSSContributions: true, projectComplexity: 'Enterprise', readmeQuality: 'High' },
+      resume: { hasEducation: false, educationLevel: 'SelfTaught', certifications: [], hackathonCount: 0, leadershipMentions: 1, skillsListed: ['Node.js', 'JavaScript', 'TypeScript', 'Express', 'Go', 'Rust'], projectsInResume: 4 }
+    }
   },
   {
     id: "cand-4",
@@ -202,7 +255,12 @@ export const mockCandidates: Candidate[] = [
       ]
     },
     rankReason: "Sarah has a highly complete profile (98%) and solid foundation, but lower overall learning velocity (78%) compared to active builders, placing her standard but highly qualified.",
-    linkedinUrl: "linkedin.com/in/sarah-jenkins-fintech"
+    linkedinUrl: "linkedin.com/in/sarah-jenkins-fintech",
+    evidenceBundle: {
+      github: { repoCount: 6, commitFrequency: 'Low', stars: 12, forks: 2, languages: ['Java', 'React', 'JavaScript'], hasOSSContributions: false, projectComplexity: 'Mid', readmeQuality: 'Medium' },
+      linkedin: { yearsExperience: 3, hasRecommendations: true, certificationCount: 2, hasConsistentProgression: true, internshipCount: 1 },
+      resume: { hasEducation: true, educationLevel: 'Bachelors', certifications: ['AWS', 'Scrum'], hackathonCount: 0, leadershipMentions: 1, skillsListed: ['Java', 'React', 'Spring', 'SQL', 'AWS'], projectsInResume: 3 }
+    }
   },
   {
     id: "cand-5",
@@ -243,6 +301,11 @@ export const mockCandidates: Candidate[] = [
     },
     rankReason: "David is ranked below Alex and Marcus because of lower current project complexity (75%) and standard learning rates, though his trajectory remains healthy.",
     githubUrl: "github.com/davidkim-backend",
-    linkedinUrl: "linkedin.com/in/davidkim-dev"
+    linkedinUrl: "linkedin.com/in/davidkim-dev",
+    evidenceBundle: {
+      github: { repoCount: 5, commitFrequency: 'Medium', stars: 8, forks: 1, languages: ['Python', 'JavaScript'], hasOSSContributions: false, projectComplexity: 'Basic', readmeQuality: 'Low' },
+      linkedin: { yearsExperience: 1, hasRecommendations: false, certificationCount: 0, hasConsistentProgression: false, internshipCount: 0 },
+      resume: { hasEducation: true, educationLevel: 'Bootcamp', certifications: [], hackathonCount: 1, leadershipMentions: 0, skillsListed: ['Python', 'Django', 'REST API', 'Docker'], projectsInResume: 3 }
+    }
   }
 ];

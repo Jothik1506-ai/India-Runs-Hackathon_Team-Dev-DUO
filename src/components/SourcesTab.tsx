@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Plus, Search, FileText, CheckCircle2, Circle, HelpCircle, Loader2 } from 'lucide-react';
+import { Send, Plus, Search, FileText, CheckCircle2, Circle, HelpCircle, Sparkles } from 'lucide-react';
+
+let _sourceMsgId = 0;
+const nextSourceMsgId = () => `smsg-${++_sourceMsgId}`;
 import type { Candidate } from '../data/mockCandidates';
 import { queryRAGIndex } from '../utils/ragEngine';
 import { ResumeUploader } from './ResumeUploader';
@@ -25,20 +28,24 @@ export const SourcesTab: React.FC<SourcesTabProps> = ({ candidates, onUploadCand
   const [notebookTitle, setNotebookTitle] = useState('Untitled notebook');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
-  // Initialize selectedSources to check all candidates by default
+  // Initialize selectedSources: preserve existing selections, auto-check only newly added candidates
   useEffect(() => {
-    const initial: Record<string, boolean> = {};
-    candidates.forEach(c => {
-      initial[c.id] = true;
+    setSelectedSources(prev => {
+      const next = { ...prev };
+      candidates.forEach(c => {
+        if (!(c.id in next)) {
+          next[c.id] = true;
+        }
+      });
+      return next;
     });
-    setSelectedSources(initial);
-  }, [candidates.length]);
+  }, [candidates]);
 
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<Message[]>(() => [
     {
-      id: 'welcome',
+      id: 'sources-welcome',
       sender: 'ai',
-      text: `Welcome to your Assessment Notebook. Select candidate resume sources on the left, then ask me questions. I will answer grounded strictly on the selected document sources.`,
+      text: `Welcome to AIVA Sources Workspace. Select candidate resume sources on the left, then ask me questions. I will answer grounded strictly on the selected document sources.`,
       timestamp: new Date()
     }
   ]);
@@ -88,7 +95,7 @@ export const SourcesTab: React.FC<SourcesTabProps> = ({ candidates, onUploadCand
     if (!textToSend.trim()) return;
 
     const userMessage: Message = {
-      id: `user-${Date.now()}`,
+      id: nextSourceMsgId(),
       sender: 'user',
       text: textToSend,
       timestamp: new Date()
@@ -101,12 +108,12 @@ export const SourcesTab: React.FC<SourcesTabProps> = ({ candidates, onUploadCand
     setTimeout(() => {
       // Find list of active selected candidate IDs
       const checkedIds = Object.keys(selectedSources).filter(id => selectedSources[id]);
-      
+
       if (checkedIds.length === 0) {
         setMessages((prev) => [...prev, {
-          id: `ai-${Date.now()}`,
+          id: nextSourceMsgId(),
           sender: 'ai',
-          text: `⚠️ Please select at least one candidate source on the left to query the notebook.`,
+          text: `⚠️ Please select at least one candidate source on the left to query the AIVA Sources Workspace.`,
           timestamp: new Date()
         }]);
         setIsTyping(false);
@@ -130,17 +137,17 @@ export const SourcesTab: React.FC<SourcesTabProps> = ({ candidates, onUploadCand
           return `[Citation ${idx + 1}] **${r.chunk.candidateName}** (${r.chunk.source}):\n"${r.chunk.text}"`;
         }).join('\n\n');
 
-        replyText = `Based on the selected candidate resume documents, here is the information found:\n\n${citationBlocks}`;
+        replyText = `Based on the selected resume sources, AIVA found the following grounded information:\n\n${citationBlocks}`;
       } else {
         // If no direct RAG matches in selected docs, fallback to summarizing selected candidates
         const selectedCandDetails = candidates.filter(c => checkedIds.includes(c.id));
         const names = selectedCandDetails.map(c => c.name).join(', ');
         
-        replyText = `I searched the selected resume files (${names}) but couldn't find a direct keyword match for your specific query. \n\nTry asking about candidate experience, specific skills (like Java, React, Python, Rust), background, or projects.`;
+        replyText = `AIVA searched the selected resume sources (${names}) but couldn't find a direct keyword match for your specific query.\n\nTry asking about candidate experience, specific skills (like Java, React, Python, Rust), background, or projects.`;
       }
 
       const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
+        id: nextSourceMsgId(),
         sender: 'ai',
         text: replyText,
         timestamp: new Date(),
@@ -298,7 +305,7 @@ export const SourcesTab: React.FC<SourcesTabProps> = ({ candidates, onUploadCand
               </h3>
             )}
             <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-              Notebook LM Mode &bull; Grounded on {Object.values(selectedSources).filter(Boolean).length} selected sources
+              AIVA Sources Workspace &bull; Grounded on {Object.values(selectedSources).filter(Boolean).length} selected sources
             </p>
           </div>
           <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
@@ -322,7 +329,7 @@ export const SourcesTab: React.FC<SourcesTabProps> = ({ candidates, onUploadCand
                   border: `1px solid ${msg.sender === 'user' ? 'var(--color-secondary)' : 'var(--color-primary)'}`,
                   flexShrink: 0
                 }}>
-                  {msg.sender === 'user' ? <span style={{ fontSize: '11px', color: 'var(--color-secondary)', fontWeight: 'bold' }}>U</span> : <span style={{ fontSize: '11px', color: 'var(--color-primary)', fontWeight: 'bold' }}>N</span>}
+                  {msg.sender === 'user' ? <span style={{ fontSize: '11px', color: 'var(--color-secondary)', fontWeight: 'bold' }}>U</span> : <Sparkles size={13} style={{ color: 'var(--color-primary)' }} />}
                 </div>
                 <div className={msg.sender === 'ai' ? 'chat-bubble-ai' : 'chat-bubble-user'} style={{
                   padding: '12px 16px',
@@ -360,7 +367,7 @@ export const SourcesTab: React.FC<SourcesTabProps> = ({ candidates, onUploadCand
                 background: 'rgba(139, 92, 246, 0.15)',
                 border: '1px solid var(--color-primary)'
               }}>
-                <Loader2 size={13} style={{ color: 'var(--color-primary)', animation: 'spin 1.5s linear infinite' }} />
+                <img src="/aiva-logo.png" alt="AIVA" style={{ width: '14px', height: '14px', objectFit: 'contain', animation: 'pulse 1.5s ease-in-out infinite' }} />
               </div>
               <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', padding: '10px 16px', borderRadius: '12px', display: 'flex', gap: '4px' }}>
                 <span className="dot" style={{ width: '6px', height: '6px', background: 'var(--text-secondary)', borderRadius: '50%', animation: 'pulse 1.2s infinite' }}></span>
@@ -384,7 +391,7 @@ export const SourcesTab: React.FC<SourcesTabProps> = ({ candidates, onUploadCand
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Ask the notebook grounded on selected sources…"
+            placeholder="Ask AIVA — grounded strictly on selected sources…"
             className="input-base"
             style={{ flexGrow: 1, padding: '11px 16px' }}
           />

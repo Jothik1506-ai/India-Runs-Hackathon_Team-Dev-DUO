@@ -1,5 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, Bot, User, MessageSquare, History } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, Sparkles, User, MessageSquare, History } from 'lucide-react';
+
+let _chatMsgId = 0;
+const nextChatMsgId = () => `cmsg-${++_chatMsgId}`;
 import type { Candidate } from '../data/mockCandidates';
 import { queryRAGIndex } from '../utils/ragEngine';
 
@@ -28,11 +32,11 @@ export const AIChatTab: React.FC<AIChatTabProps> = ({ candidates, aiName, onSele
   ]);
   const [activeConvId, setActiveConvId] = useState('c1');
 
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<Message[]>(() => [
     {
-      id: 'welcome',
+      id: 'chat-welcome',
       sender: 'ai',
-      text: `Hello! I am ${aiName}, your Talent Intelligence Assistant. I evaluate, profile, and rank candidates beyond standard resume keywords.\n\nTry asking me about specific talent cohorts or rankings!`,
+      text: `Hello! I am ${aiName}, your AIVA Talent Intelligence Assistant. I evaluate, profile, and rank candidates beyond standard resume keywords.\n\nTry asking me about specific talent cohorts or rankings!`,
       timestamp: new Date(),
       suggestions: [
         "Show candidates with high growth potential",
@@ -64,7 +68,7 @@ export const AIChatTab: React.FC<AIChatTabProps> = ({ candidates, aiName, onSele
       const ids = ragMatches.map(r => r.chunk.candidateId);
       const matchedCandidates = candidates.filter(c => ids.includes(c.id));
       return {
-        responseText: `I searched the RAG indexed resumes database and found the following relevant matches:\n\n${matchDetails}`,
+        responseText: `AIVA searched the talent intelligence database and found the following relevant matches:\n\n${matchDetails}`,
         matches: matchedCandidates
       };
     }
@@ -120,7 +124,7 @@ export const AIChatTab: React.FC<AIChatTabProps> = ({ candidates, aiName, onSele
     if (!textToSend.trim()) return;
 
     const userMessage: Message = {
-      id: `user-${Date.now()}`,
+      id: nextChatMsgId(),
       sender: 'user',
       text: textToSend,
       timestamp: new Date()
@@ -133,7 +137,7 @@ export const AIChatTab: React.FC<AIChatTabProps> = ({ candidates, aiName, onSele
     setTimeout(() => {
       const { responseText, matches } = processQuery(textToSend);
       const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
+        id: nextChatMsgId(),
         sender: 'ai',
         text: responseText,
         timestamp: new Date(),
@@ -198,11 +202,11 @@ export const AIChatTab: React.FC<AIChatTabProps> = ({ candidates, aiName, onSele
         
         {/* Header bar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 18px', borderBottom: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.15)' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(139,92,246,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(139,92,246,0.4)', boxShadow: '0 0 16px rgba(139,92,246,0.2)' }}>
-            <Bot size={17} style={{ color: 'var(--color-primary)' }} />
+          <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(139,92,246,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(139,92,246,0.4)', boxShadow: '0 0 16px rgba(139,92,246,0.2)', padding: '5px' }}>
+            <img src="/aiva-logo.png" alt="AIVA" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <div>
-            <h3 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>{aiName} Agent Inquiries</h3>
+            <h3 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>AIVA Recruiter Assistant</h3>
             <span style={{ fontSize: '11px', color: 'var(--color-success)', display: 'flex', alignItems: 'center', gap: '5px' }}>
               <span className="status-dot-online" />
               Ready &bull; Indexing {`${candidates.length}`} candidate profiles
@@ -212,8 +216,15 @@ export const AIChatTab: React.FC<AIChatTabProps> = ({ candidates, aiName, onSele
 
         {/* Messaging area */}
         <div style={{ flexGrow: 1, padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <AnimatePresence initial={false}>
           {messages.map((msg) => (
-            <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 10, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.22 }}
+              style={{ display: 'flex', flexDirection: 'column', alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}
+            >
               <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', flexDirection: msg.sender === 'user' ? 'row-reverse' : 'row' }}>
                 <div style={{ 
                   width: '28px', 
@@ -226,7 +237,10 @@ export const AIChatTab: React.FC<AIChatTabProps> = ({ candidates, aiName, onSele
                   border: `1px solid ${msg.sender === 'user' ? 'var(--color-secondary)' : 'var(--color-primary)'}`,
                   flexShrink: 0
                 }}>
-                  {msg.sender === 'user' ? <User size={13} style={{ color: 'var(--color-secondary)' }} /> : <Sparkles size={13} style={{ color: 'var(--color-primary)' }} />}
+                  {msg.sender === 'user'
+                    ? <User size={13} style={{ color: 'var(--color-secondary)' }} />
+                    : <img src="/aiva-logo.png" alt="AIVA" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+                  }
                 </div>
                 <div className={msg.sender === 'ai' ? 'chat-bubble-ai' : 'chat-bubble-user'} style={{
                   padding: '12px 16px',
@@ -273,8 +287,9 @@ export const AIChatTab: React.FC<AIChatTabProps> = ({ candidates, aiName, onSele
                   ))}
                 </div>
               )}
-            </div>
+            </motion.div>
           ))}
+          </AnimatePresence>
 
           {isTyping && (
             <div style={{ display: 'flex', gap: '10px', alignSelf: 'flex-start', alignItems: 'center' }}>
@@ -288,7 +303,7 @@ export const AIChatTab: React.FC<AIChatTabProps> = ({ candidates, aiName, onSele
                 background: 'var(--color-primary-glow)',
                 border: '1px solid var(--color-primary)'
               }}>
-                <Bot size={13} style={{ color: 'var(--color-primary)' }} />
+                <img src="/aiva-logo.png" alt="AIVA" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
               </div>
               <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', padding: '10px 16px', borderRadius: '12px', display: 'flex', gap: '4px' }}>
                 <span className="dot" style={{ width: '6px', height: '6px', background: 'var(--text-secondary)', borderRadius: '50%', animation: 'pulse 1.2s infinite' }}></span>
@@ -312,7 +327,7 @@ export const AIChatTab: React.FC<AIChatTabProps> = ({ candidates, aiName, onSele
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder={`Ask ${aiName} anything about candidates…`}
+            placeholder="Ask AIVA about candidates, skills, rankings, or insights…"
             className="input-base"
             style={{ flexGrow: 1, padding: '11px 16px' }}
           />
