@@ -9,7 +9,7 @@ team_name: "aptiv-aiva"
 primary_contact:
   name: "Jothik Kanth"
   email: "vanamjothik@gmail.com"
-  phone: "+91-XXXXXXXXXX"
+  phone: "+91-7396982619"
 
 team_members:
   - name: "Jothik Kanth"
@@ -21,7 +21,7 @@ team_members:
 # ============================================================================
 github_repo: "https://github.com/vanamjothik/aptiv-redrob"
 
-sandbox_link: "https://huggingface.co/spaces/vanamjothik/redrob-ranker"
+sandbox_link: "https://vanamjothik-redrob-ranker.streamlit.app"
 
 reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submission.csv"
 
@@ -82,4 +82,4 @@ declarations:
   code_is_original_work: true
   no_collusion: true
   honeypot_check_done: true
-  reproduction_tested: false
+  reproduction_tested: true
