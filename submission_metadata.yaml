@@ -1,0 +1,85 @@
+# Redrob Hackathon — Submission Metadata
+# India Runs Data & AI Challenge
+
+# ============================================================================
+# Team identity
+# ============================================================================
+team_name: "aptiv-aiva"
+
+primary_contact:
+  name: "Jothik Kanth"
+  email: "vanamjothik@gmail.com"
+  phone: "+91-XXXXXXXXXX"
+
+team_members:
+  - name: "Jothik Kanth"
+    email: "vanamjothik@gmail.com"
+    role: "Team Lead / Full-Stack AI Engineer"
+
+# ============================================================================
+# Code and reproducibility
+# ============================================================================
+github_repo: "https://github.com/vanamjothik/aptiv-redrob"
+
+sandbox_link: "https://huggingface.co/spaces/vanamjothik/redrob-ranker"
+
+reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submission.csv"
+
+# ============================================================================
+# Compute environment
+# ============================================================================
+compute:
+  platform: "Windows 11 Home (Local)"
+  cpu_cores: 8
+  ram_gb: 16
+  python_version: "3.11"
+  os: "Windows 11 Home Single Language 10.0.26220"
+  uses_gpu_for_inference: false
+  has_network_during_ranking: false
+  pre_computation_required: false
+  pre_computation_time_minutes: 0
+
+# ============================================================================
+# AI tools declaration
+# ============================================================================
+ai_tools_used:
+  - "Claude"
+  - "Gemini"
+
+ai_usage_summary: |
+  Used Claude Code (Claude Sonnet 4.6) for architecture discussion, code structure,
+  and implementation of the ranking pipeline. Used Gemini for initial planning.
+  No candidate data was fed to any LLM — all scoring is rule-based and deterministic.
+  The ranking logic runs entirely offline with no API calls during execution.
+
+# ============================================================================
+# Approach summary
+# ============================================================================
+methodology_summary: |
+  Rule-based multi-signal ranker with explicit explainability. Five scoring
+  components weighted as: skill relevance (35%), experience fit (20%),
+  behavioral signals (20%), availability/notice period (15%), location (10%).
+
+  Skill scoring uses a two-tier taxonomy of AI/ML/NLP/Search skills with a
+  trust multiplier derived from endorsement count and usage duration — this
+  catches keyword stuffers who list "expert" skills with zero months of use.
+
+  Three disqualification rules: (1) honeypot detection — expert/advanced
+  proficiency with 0 months duration is an immediate filter; (2) all-consulting
+  disqualifier — candidates whose entire career is at Big-IT services firms
+  (TCS, Infosys, Wipro, Accenture, etc.) are excluded; (3) pure academia —
+  candidates with only university/research-institute roles are filtered out.
+
+  Reasoning strings use five rotating templates keyed by score to ensure
+  variation across the 100 ranked entries. Runtime: ~60 seconds for 100K
+  candidates on CPU with 8GB RAM.
+
+# ============================================================================
+# Declarations
+# ============================================================================
+declarations:
+  read_submission_spec: true
+  code_is_original_work: true
+  no_collusion: true
+  honeypot_check_done: true
+  reproduction_tested: false
