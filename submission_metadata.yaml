@@ -21,7 +21,7 @@ team_members:
 # ============================================================================
 github_repo: "https://github.com/vanamjothik/aptiv-redrob"
 
-sandbox_link: "https://vanamjothik-redrob-ranker.streamlit.app"
+sandbox_link: "https://india-runs-hackathonteam-dev-duo.streamlit.app"
 
 reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submission.csv"
 

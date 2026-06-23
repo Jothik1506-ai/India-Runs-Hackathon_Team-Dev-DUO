@@ -4,8 +4,10 @@
 Team: **Dev DUO**
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://india-runs-hackathon-team-dev-duo.vercel.app/)
+[![Streamlit Sandbox](https://img.shields.io/badge/Ranker%20Sandbox-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://india-runs-hackathonteam-dev-duo.streamlit.app/)
 
-> **[https://india-runs-hackathon-team-dev-duo.vercel.app/](https://india-runs-hackathon-team-dev-duo.vercel.app/)**
+> **Dashboard:** [https://india-runs-hackathon-team-dev-duo.vercel.app/](https://india-runs-hackathon-team-dev-duo.vercel.app/)  
+> **Ranker Sandbox:** [https://india-runs-hackathonteam-dev-duo.streamlit.app/](https://india-runs-hackathonteam-dev-duo.streamlit.app/)
 
 ---
 
