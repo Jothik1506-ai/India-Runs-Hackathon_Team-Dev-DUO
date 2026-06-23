@@ -3,6 +3,7 @@ APTIV — Redrob Hackathon Candidate Ranker · Streamlit Sandbox
 Upload a candidates.jsonl sample and get a ranked CSV back in seconds.
 """
 
+import base64
 import csv
 import io
 import json
@@ -21,10 +22,24 @@ sys.path.insert(0, ".")
 from rank import is_honeypot, is_pure_academia, is_pure_consulting
 from rank import rank_candidates as _rank_jsonl
 
+# ── Load logo as base64 ───────────────────────────────────────────────────────
+_LOGO_PATH = pathlib.Path(__file__).parent / "public" / "logo.jpg"
+_logo_b64 = ""
+if _LOGO_PATH.exists():
+    _logo_b64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode()
+
+def logo_img(size: int = 48, extra_style: str = "") -> str:
+    if not _logo_b64:
+        return ""
+    return (
+        f'<img src="data:image/jpeg;base64,{_logo_b64}" '
+        f'style="width:{size}px;height:{size}px;object-fit:contain;border-radius:10px;{extra_style}" />'
+    )
+
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="APTIV · Candidate Ranker",
-    page_icon="🧬",
+    page_icon=_LOGO_PATH if _LOGO_PATH.exists() else "🧬",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -285,13 +300,10 @@ def score_bar_html(score: float) -> str:
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 
 with st.sidebar:
-    st.markdown("""
+    st.markdown(f"""
     <div style="text-align:center;padding-bottom:1.2rem;border-bottom:1px solid rgba(255,255,255,0.07)">
-        <div style="font-size:1.6rem;font-weight:800;background:linear-gradient(135deg,#00D4AA,#7C3AED);
-                    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">
-            APTIV
-        </div>
-        <div style="font-size:0.7rem;color:#4b5563;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px">
+        {logo_img(72, "display:block;margin:0 auto 0.6rem auto;")}
+        <div style="font-size:0.7rem;color:#4b5563;letter-spacing:0.1em;text-transform:uppercase;margin-top:4px">
             AI Talent Intelligence
         </div>
     </div>
@@ -350,20 +362,25 @@ with st.sidebar:
 
 # ── Hero ──────────────────────────────────────────────────────────────────────
 
-st.markdown("""
+st.markdown(f"""
 <div class="glass-card" style="padding:2rem 2.5rem">
-    <p class="hero-title">🧬 APTIV Candidate Ranker</p>
-    <p class="hero-sub">Redrob Hackathon · India Runs Data & AI Challenge · Team Dev DUO</p>
-    <div class="hero-badges">
-        <a class="badge badge-vercel" href="https://india-runs-hackathon-team-dev-duo.vercel.app/" target="_blank">
-            ▲ Live Dashboard
-        </a>
-        <a class="badge badge-streamlit" href="https://india-runs-hackathonteam-dev-duo.streamlit.app/" target="_blank">
-            ● Streamlit Sandbox
-        </a>
-        <a class="badge badge-github" href="https://github.com/Jothik1506-ai/India-Runs-Hackathon_Team-Dev-DUO" target="_blank">
-            ⌥ GitHub Repo
-        </a>
+    <div style="display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap">
+        {logo_img(88, "flex-shrink:0;")}
+        <div>
+            <p class="hero-title">APTIV Candidate Ranker</p>
+            <p class="hero-sub">Redrob Hackathon · India Runs Data & AI Challenge · Team Dev DUO</p>
+            <div class="hero-badges">
+                <a class="badge badge-vercel" href="https://india-runs-hackathon-team-dev-duo.vercel.app/" target="_blank">
+                    ▲ Live Dashboard
+                </a>
+                <a class="badge badge-streamlit" href="https://india-runs-hackathonteam-dev-duo.streamlit.app/" target="_blank">
+                    ● Streamlit Sandbox
+                </a>
+                <a class="badge badge-github" href="https://github.com/Jothik1506-ai/India-Runs-Hackathon_Team-Dev-DUO" target="_blank">
+                    ⌥ GitHub Repo
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
